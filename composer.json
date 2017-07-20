@@ -1,0 +1,29 @@
+{
+    "name": "WordPressMeta",
+    "description": "Meta toolbox for Wordpress",
+    "keywords": [ 
+        "WordPress", 
+        "Custom Metabox",
+        "Meta Information",
+        "Meta Removal",
+        "Meta Update",
+        "Higher Education"
+    ],
+    "authors": [
+        {
+            "name": "Jason Comes",
+            "email": "jcomes@highereducation.com",
+            "homepage": "http://www.highereducation.com",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "email": "jcomes@highereducation.com"
+    },
+    "homepage": "http://www.highereducation.com",
+    "autoload": {
+        "psr-4": {
+            "WordPressMeta\\": "src/"
+        }
+    }
+}
