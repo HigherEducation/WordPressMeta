@@ -37,7 +37,7 @@ Used to build simple custom metabox.
 
 ## Initialize
 ```
-use WordpressMeta\Metabox;
+use WordPressMeta\Metabox;
 
 $metabox = new Metabox();
 $metabox->setSettings(array(
@@ -538,7 +538,7 @@ Used to retrieve meta fields with defined search query/fields. **Requirements to
 
 ### Initialize
 ```
-use WordpressMeta\Meta;
+use WordPressMeta\Meta;
 
 $meta = new Meta;
 $meta->setMeta(array(

@@ -1,6 +1,6 @@
 <?php
 
-namespace HigherEducation;
+namespace WordPressMeta;
 
 /**
  * Metabox Class
