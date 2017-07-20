@@ -528,7 +528,9 @@ class Metabox
                     } else {
 
                         echo '<div data-subfields-parent="' . $name . '">';
+
                             $this->getFields($post, $attributes['subfields']);
+                            
                         echo '</div>';
 
                     }
