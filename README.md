@@ -350,6 +350,32 @@ For validation, use `pattern` attribute with `tel` input if browser doesn't supp
 Can be inserted between metakeys to create titles, breaks, messages or additional instructions. 
 
 
+##### Nested
+```
+'metakey' => array(
+    'label'       => '',
+    'description' => '',
+    'dependency'  => array(),
+    'callback'    => '',
+    'repeater'    => bool
+    'subfields'   => array(
+        'subkey' => array(
+            'type'   => 'text', 
+            'value'  => '',
+            'label'  => '',
+            ...
+        ),
+        'subkey' => array(
+            'type'   => 'text', 
+            'value'  => '',
+            'label'  => '',
+            ...
+        )
+    )
+)
+```
+Builds a nested json object into the `metakey`, this can be a repeater with an array of objects stored if `repeater` set to true. Note: Editor field currently doesn't work with repeater field. Also subkeys do not except `dependency` or `callback` attributes.
+
 ### Field Properties Information
 
 ##### type
