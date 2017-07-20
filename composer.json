@@ -1,5 +1,5 @@
 {
-    "name": "highereducation/meta",
+    "name": "WordPressMeta",
     "description": "Meta toolbox for Wordpress",
     "keywords": [ 
         "WordPress", 
@@ -23,7 +23,7 @@
     "homepage": "http://www.highereducation.com",
     "autoload": {
         "psr-4": {
-            "HigherEducation\\": "src/"
+            "WordPressMeta\\": "src/"
         }
     }
 }

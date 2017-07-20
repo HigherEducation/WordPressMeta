@@ -1,12 +1,12 @@
 # Composer Setup
 ```
 "require": {
-    "highereducation/meta": "dev-master"
+    "WordPressMeta": "dev-master"
 },
 "repositories": [
     {
         "type": "vcs",
-        "url": "https://github.com/jasoncomes/WordpressMeta"
+        "url": "https://github.com/HigherEducation/WordPressMeta"
     }
 ],
 ```
