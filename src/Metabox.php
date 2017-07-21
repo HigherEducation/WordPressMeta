@@ -427,6 +427,19 @@ class Metabox
                 $valueArray     = json_decode($storedValue);
                 $groupSubfields = array();
 
+                // Dependencies.
+                $dataDependency = '';
+                if (!empty($attributes['dependency'])) {
+
+                    $dataDependency  = !empty($attributes['dependency']['key']) ? 'data-dependency-key="' . $attributes['dependency']['key'] . '"' : '';
+                    $dataDependency .= !empty($attributes['dependency']['value']) ? 'data-dependency-value=\'' . $attributes['dependency']['value'] . '\'' : '';
+                    $dataDependency .= !empty($attributes['dependency']['condition']) ? 'data-dependency-condition="' . $attributes['dependency']['condition'] . '"' : '';
+
+                }
+
+                // Show field by input type.
+                echo '<div class="input-group type-object" ' . $dataDependency . ' data-key="' . $name . '" data-type="object">';
+
                 // Set label if exists.
                 if (!empty($attributes['label'])) {
 
@@ -528,13 +541,12 @@ class Metabox
                     } else {
 
                         echo '<div data-subfields-parent="' . $name . '">';
-
                             $this->getFields($post, $attributes['subfields']);
-                            
                         echo '</div>';
 
                     }
 
+                // End of Input Area.
                 echo '</div>';
 
                 // If repeater.
@@ -543,6 +555,9 @@ class Metabox
                     echo '<div class="button-controls"><button data-subfields-add="' . $name . '" class="button-primary">Add</button></div>';
 
                 }
+
+                // End of Field Group.
+                echo '</div>';
 
                 // Jump to next field.
                 continue;
