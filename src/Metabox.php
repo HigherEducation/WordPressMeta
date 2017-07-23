@@ -839,12 +839,11 @@ class Metabox
     {
         // vars.
         $hasPost = $hasParent = $hasTaxonomy = $hasTemplates = true;
+        $postID  = !empty($_GET['post']) ? $_GET['post'] : '';
 
-        // Allow save on $_POST submit, needed for conditional priority conflicts.
-        if (!empty($_POST)) {
-
-            return true;
-
+        // Check if Post Save.
+        if (!empty($_POST['post_ID'])) {
+            $postID = $_POST['post_ID'];
         }
 
         // Check if admin.
@@ -855,7 +854,7 @@ class Metabox
         }
 
         // Check if post is empty.
-        if (empty($_GET['post'])) {
+        if (empty($postID)) {
 
             return false;
 
@@ -867,8 +866,8 @@ class Metabox
             $hasPost = false;
 
             if (
-                (is_array($this->settings['post']) && in_array($_GET['post'], $this->settings['post'])) ||
-                ($this->settings['post'] == $_GET['post'])
+                (is_array($this->settings['post']) && in_array($postID, $this->settings['post'])) ||
+                ($this->settings['post'] == $postID)
             ) {
 
                 $hasPost = true;
@@ -883,8 +882,8 @@ class Metabox
             $hasParent = false;
 
             if (
-                (is_array($this->settings['parent']) && in_array(wp_get_post_parent_id($_GET['post']), $this->settings['parent'])) ||
-                $this->settings['parent'] == wp_get_post_parent_id($_GET['post'])
+                (is_array($this->settings['parent']) && in_array(wp_get_post_parent_id($postID), $this->settings['parent'])) ||
+                $this->settings['parent'] == wp_get_post_parent_id($postID)
             ) {
 
                 $hasParent = true;
@@ -902,7 +901,7 @@ class Metabox
             foreach ($this->settings['taxonomy'] as $taxonomyAllowed => $termsAllowed) {
 
                 // Get post terms based on taxonomy.
-                $postTerms = get_the_terms($_GET['post'], $taxonomyAllowed);
+                $postTerms = get_the_terms($postID, $taxonomyAllowed);
 
                 // Check for if post terms.
                 if (empty($postTerms)) {
@@ -954,7 +953,7 @@ class Metabox
 
             // vars.
             $hasTemplates = false;
-            $template     = get_page_template_slug($_GET['post']);
+            $template     = get_page_template_slug($postID);
 
             if (
                 !empty($template) &&
