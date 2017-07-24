@@ -22,6 +22,7 @@ class Metabox
         'parent'     => array(),
         'taxonomy'   => array(),
         'template'   => array(),
+        'operator'   => 'OR',
         'location'   => 'normal',
         'priority'   => 'high',
         'dependency' => array(),
@@ -123,25 +124,32 @@ class Metabox
     public function build()
     {
 
-        // Initiate if in adminstrator area.
-        if ($this->validateSettings()) {
+        add_action('init', function() {
 
-            // Check to see if assets already loaded, only load assets once.
-            if (!self::$assetsLoaded) {
+            // Initiate if in adminstrator area.
+            if ($this->validateSettings()) {
 
-                self::$assetsLoaded = true;
+                // Check to see if assets already loaded, only load assets once.
+                if (!self::$assetsLoaded) {
 
-                $this->addCDNAssets();
-                $this->assetsHeader();
-                $this->assetsFooter();
-                $this->removeWPCustomMetabox();
+                    self::$assetsLoaded = true;
 
+                    $this->addCDNAssets();
+                    $this->assetsHeader();
+                    $this->assetsFooter();
+                    $this->removeWPCustomMetabox();
+
+                }
+
+                // Add & Save Metabox Init.
+                $this->initMetabox();
+                $this->initSavePost();
             }
 
-            // Add & Save Metabox Init.
-            $this->initMetabox();
-            $this->initSavePost();
-        }
+        }, 
+            15
+        );
+
     }
 
 
@@ -277,20 +285,6 @@ class Metabox
         add_action('admin_menu', function()
         {
 
-            // Remove from specified post types.
-            if (!empty($this->settings['post_type'])) {
-
-                foreach ($this->settings['post_type'] as $post_type) {
-
-                    remove_meta_box('postcustom', $post_type, 'normal');
-
-                }
-
-                return;
-
-            }
-
-            // Remove from all if none specified.
             foreach (get_post_types('', 'names') as $post_type) {
 
                 remove_meta_box('postcustom', $post_type, 'normal');
@@ -320,7 +314,7 @@ class Metabox
                 'custom-metabox-' . $this->settings['id'],
                 $this->settings['title'],
                 array($this, 'showMetaboxHTML'),
-                $this->settings['post_type'],
+                $this->settings['operator'] == 'AND' ? $this->settings['post_type'] : null,
                 $this->settings['location'],
                 $this->settings['priority']
             );
@@ -333,19 +327,6 @@ class Metabox
             }
 
             // Add dependency class to metabox container to initially hide.
-            if (!empty($this->settings['post_type'])) {
-
-                foreach ($this->settings['post_type'] as $post_type) {
-
-                    add_filter('postbox_classes_' . $post_type . '_custom-metabox-' . $this->settings['id'], array($this, 'addMetaboxClass'));
-
-                }
-
-                return;
-
-            }
-
-            // If no post type specified, add to all if dependency set.
             foreach (get_post_types('', 'names') as $post_type) {
 
                 add_filter('postbox_classes_' . $post_type . '_custom-metabox-' . $this->settings['id'], array($this, 'addMetaboxClass'));
@@ -838,12 +819,14 @@ class Metabox
     private function validateSettings()
     {
         // vars.
-        $hasPost = $hasParent = $hasTaxonomy = $hasTemplates = true;
+        $hasPost = $hasPostType = $hasParent = $hasTaxonomy = $hasTemplates = ($this->settings['operator'] == 'AND');
         $postID  = !empty($_GET['post']) ? $_GET['post'] : '';
 
         // Check if Post Save.
         if (!empty($_POST['post_ID'])) {
+
             $postID = $_POST['post_ID'];
+
         }
 
         // Check if admin.
@@ -877,6 +860,22 @@ class Metabox
         }
 
         // Check if settings.parent is set.
+        if (!empty($this->settings['post_type'])) {
+
+            $hasPostType = false;
+
+            if (
+                (is_array($this->settings['post_type']) && in_array(get_post_type($postID), $this->settings['post_type'])) ||
+                $this->settings['post_type'] == get_post_type($postID)
+            ) {
+                
+                $hasPostType = true;
+
+            }
+
+        }
+
+        // Check if settings.parent is set.
         if (!empty($this->settings['parent'])) {
 
             $hasParent = false;
@@ -904,7 +903,7 @@ class Metabox
                 $postTerms = get_the_terms($postID, $taxonomyAllowed);
 
                 // Check for if post terms.
-                if (empty($postTerms)) {
+                if (is_wp_error($postTerms) || empty($postTerms)) {
 
                     continue;
 
@@ -970,13 +969,31 @@ class Metabox
         }
 
         // Final Check
-        if (!$hasPost || !$hasParent || !$hasTaxonomy || !$hasTemplates) {
+        if ($this->settings['operator'] == 'AND') {
 
-            return false;
+            if (!$hasPost || !$hasPostType || !$hasParent || !$hasTaxonomy || !$hasTemplates) {
+
+                return false;
+
+            } else {
+
+                return true;
+
+            }
+
+        } else {
+
+            if ($hasPost || $hasPostType || $hasParent || $hasTaxonomy || $hasTemplates) {
+
+                return true;
+
+            } else {
+
+                return false;
+            }
 
         }
 
-        return true;
     }
 
 
