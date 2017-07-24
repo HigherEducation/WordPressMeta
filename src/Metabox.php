@@ -722,7 +722,13 @@ class Metabox
                 // If is value is array
                 if (is_array($_POST[$name])) {
 
-                    $_POST[$name] = json_encode($_POST[$name], JSON_PRETTY_PRINT|JSON_HEX_QUOT|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS);
+                    $_POST[$name] = wp_slash(
+                        stripslashes(
+                            json_encode(
+                                $_POST[$name], JSON_PRETTY_PRINT|JSON_HEX_QUOT|JSON_HEX_APOS
+                            )
+                        )
+                    );
 
                     if (JSON_ERROR_NONE != json_last_error()) {
 

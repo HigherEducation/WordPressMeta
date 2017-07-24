@@ -4,7 +4,7 @@
     echo $descriptionHTML;
 
     wp_editor( 
-        $value, 
+        esc_textarea($value), 
         'he-editor-' . rand(1, 1000000), 
         array(
             'textarea_name'  => $name,
