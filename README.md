@@ -52,17 +52,18 @@ $metabox->build();
 ## Settings
 ```
 array(
-    'title'      => '',
-    'id'         => '',
-    'message'    => '',
-    'post_type'  => array() || '',
-    'post'       => array() || '',
-    'parent'     => array() || '',
-    'template'   => array() || '',
-    'taxonomy'   => array(),
-    'location'   => 'normal',
-    'priority'   => 'high',
-    'dependency' => array()
+    'title'        => '',
+    'id'           => '',
+    'instructions' => '',
+    'post_type'    => array() || '',
+    'post'         => array() || '',
+    'parent'       => array() || '',
+    'template'     => array() || '',
+    'taxonomy'     => array(),
+    'operator'     => '',
+    'location'     => 'normal',
+    'priority'     => 'high',
+    'dependency'   => array()
 )
 ```
 
@@ -72,7 +73,7 @@ array(
 ##### id
 (string) (Optional) Unique ID of metabox, if not entered will autogenerate a random number custom-metabox-`1-100000`.
 
-##### message
+##### instructions
 (string) (Optional) Can contain html tags.
 
 ##### location
@@ -95,6 +96,9 @@ array(
 
 ##### template
 (string|array) (Optional) Metabox will only display on specified template. e.g. `array('front-page.php', 'contact-page.php')` or `'front-page.php'`
+
+##### operator
+(string) (Optional) How you'd like to query your location rules together, `post_type`, `post`, `parent`, `taxonomy`. Accepts `AND` or `OR`. Default is set to 'OR'.
 
 ##### dependency 
 (array) (Optional) Metabox dependency based on metafield conditions. Conditionals include `>, <, >=, <=, ==, !=, between, outside`. For `>, <, >=, <=`, only accept numeric values. For `==, !=`, can accept single value or array of values to match. e.g. `value` or `[3, "343", 55, "Value"]`. For `between & outside` only accepts array of values. e.g. `[2, 6]`. 
@@ -439,11 +443,11 @@ Builds a nested json object into the `metakey`, this can be a repeater with an a
 ```
 $widgetXYZ = new Metabox();
 $widgetXYZ->setSettings(array(
-   'title'    => 'Title',
-   'message'  => '',
-   'post_type' => array('post', 'pages'),
-   'location' => 'side',
-   'priority' => 'high',
+   'title'        => 'Title',
+   'instructions' => '',
+   'post_type'    => array('post', 'pages'),
+   'location'     => 'side',
+   'priority'     => 'high',
 ));
 $widgetXYZ->setFields(array(
     'title' => array(

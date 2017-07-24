@@ -27,8 +27,8 @@
   margin: 24px 0 15px
 }
 
-/* Description */
-[id^="custom-metabox"] .description {
+/* Instructions */
+[id^="custom-metabox"] .instructions {
   background: #f5f5f5;
   border-radius: 1px;
   display: block;
@@ -225,7 +225,7 @@
 
 /* Subfields */
 [data-subfields-parent] {
-  background-color: #f9f9f9;
+  background-color: #f4f4f4;
   border: 1px solid #efefef;
   border-top: 0;
   padding: 1px 15px 15px;

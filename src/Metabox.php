@@ -14,18 +14,18 @@ class Metabox
      * @var array
      */
     private $settings = array(
-        'title'      => 'Custom Meta',
-        'id'         => '',
-        'message'    => '',
-        'post_type'  => array(),
-        'post'       => array(),
-        'parent'     => array(),
-        'taxonomy'   => array(),
-        'template'   => array(),
-        'operator'   => 'OR',
-        'location'   => 'normal',
-        'priority'   => 'high',
-        'dependency' => array(),
+        'title'        => 'Custom Meta',
+        'id'           => '',
+        'instructions' => '',
+        'post_type'    => array(),
+        'post'         => array(),
+        'parent'       => array(),
+        'taxonomy'     => array(),
+        'template'     => array(),
+        'operator'     => 'OR',
+        'location'     => 'normal',
+        'priority'     => 'high',
+        'dependency'   => array(),
     );
 
 
@@ -360,9 +360,9 @@ class Metabox
         }
 
         // Show metabox introduction message.
-        if (!empty($this->settings['message'])) {
+        if (!empty($this->settings['instructions'])) {
 
-            echo '<div class="message">' . $this->settings['message'] . '</div>';
+            echo '<div class="instructions">' . $this->settings['instructions'] . '</div>';
 
         }
 
