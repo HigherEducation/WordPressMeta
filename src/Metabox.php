@@ -91,7 +91,7 @@ class Metabox
     {
 
         // Check if shortcut arguments are set.
-        if (empty($args) || (empty($args['fields']) && empty($args['settings']['message']))) {
+        if (empty($args) || (empty($args['fields']) && empty($args['settings']['instructions']))) {
 
             return;
 
@@ -359,7 +359,7 @@ class Metabox
 
         }
 
-        // Show metabox introduction message.
+        // Show metabox instructions.
         if (!empty($this->settings['instructions'])) {
 
             echo '<div class="instructions">' . $this->settings['instructions'] . '</div>';
