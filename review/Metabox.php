@@ -20,7 +20,7 @@ class Metabox
      * Fields/Messages for Metabox
      * @var array
      */
-    private $fields = array();
+    private $fields = [];
 
 
     /**
@@ -48,35 +48,35 @@ class Metabox
      * Settings for Metabox
      * @var array
      */
-    private $settings = array(
+    private $settings = [
         'title'        => 'Custom Meta',
         'id'           => '',
         'instructions' => '',
-        'post_type'    => array(),
-        'post'         => array(),
-        'parent'       => array(),
-        'taxonomy'     => array(),
-        'template'     => array(),
+        'post_type'    => [],
+        'post'         => [],
+        'parent'       => [],
+        'taxonomy'     => [],
+        'template'     => [],
         'prefix'       => '',
         'operator'     => 'OR',
         'location'     => 'normal',
         'priority'     => 'high',
-        'dependency'   => array(),
-        'remove'       => array('custom-fields')
-    );
+        'dependency'   => [],
+        'remove'       => ['custom-fields']
+    ];
 
 
     /**
      * Acceptable Field Attributes for Metabox
      * @var array
      */
-    private $fieldAttributes = array(
+    private $fieldAttributes = [
         'type'        => '',
         'value'       => '',
         'label'       => '',
         'description' => '',
         'placeholder' => '',
-        'options'     => array(),
+        'options'     => [],
         'required'    => false,
         'pattern'     => '',
         'style'       => '',
@@ -84,11 +84,11 @@ class Metabox
         'max'         => '',
         'maxlength'   => '',
         'readonly'    => false,
-        'dependency'  => array(),
+        'dependency'  => [],
         'repeater'    => false,
-        'subfields'   => array(),
+        'subfields'   => [],
         'callback'    => '',
-    );
+    ];
 
 
 
@@ -171,7 +171,7 @@ class Metabox
      * @param  array $args
      *
      */
-    public function setSettings($args = array())
+    public function setSettings($args = [])
     {
 
         // Check if arguments are empty.
@@ -198,14 +198,14 @@ class Metabox
         // Set Remove WP Feautres.
         if (!empty($args['remove']) && !is_array($args['remove'])) {
 
-            $args['remove'] = array($args['remove']);
+            $args['remove'] = [$args['remove']];
 
         }
 
         // Set post type to array if string.
         if (!empty($args['post_type']) && !is_array($args['post_type'])) {
 
-            $args['post_type'] = array($args['post_type']);
+            $args['post_type'] = [$args['post_type']];
 
         }
 
@@ -221,7 +221,7 @@ class Metabox
      * @param  array $args
      *
      */
-    public function setFields($args = array())
+    public function setFields($args = [])
     {
 
         // Check if arguments are empty.
@@ -252,7 +252,7 @@ class Metabox
                 // Subfield Values.
                 if (!empty($attributes['subfields'])) {
                     $valueArray = json_decode($storedValue);
-                    $valueArray = is_object($valueArray) ? array($valueArray) : $valueArray;
+                    $valueArray = is_object($valueArray) ? [$valueArray] : $valueArray;
                 }
 
             }
@@ -272,7 +272,7 @@ class Metabox
                 // If Instructions/Snippet
                 if (is_int($subName) && is_string($subAttributes)) {
 
-                    $this->fields[$this->settings['prefix'] . $name]['subfields'][$subName] = array('snippet' => $subAttributes);
+                    $this->fields[$this->settings['prefix'] . $name]['subfields'][$subName] = ['snippet' => $subAttributes];
                     continue;
 
                 }
@@ -320,7 +320,7 @@ class Metabox
             wp_enqueue_style('select2-css');
 
             // Add script to administrator area.
-            wp_enqueue_script('select2-js', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js', array('jquery', 'jquery-ui-sortable'), null, false);
+            wp_enqueue_script('select2-js', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js', ['jquery', 'jquery-ui-sortable'], null, false);
             wp_enqueue_script('select2-js');
 
         });
@@ -405,7 +405,7 @@ class Metabox
             add_meta_box(
                 'custom-metabox-' . $this->settings['id'],
                 $this->settings['title'],
-                array($this, 'showMetaboxHTML'),
+                [$this, 'showMetaboxHTML'],
                 $this->settings['operator'] == 'AND' ? $this->settings['post_type'] : null,
                 $this->settings['location'],
                 $this->settings['priority']
@@ -1032,7 +1032,7 @@ class Metabox
         }
 
         // Call self instead of class.
-        $attributes['callback'] = str_replace(array('Metabox::', 'Metabox->'), 'self::', $attributes['callback']);
+        $attributes['callback'] = str_replace(['Metabox::', 'Metabox->'], 'self::', $attributes['callback']);
 
         // Check if is callable.
         if (!is_callable($attributes['callback'])) {
@@ -1042,12 +1042,12 @@ class Metabox
         }
 
         // Data attribute of callback.
-        $data = array(
+        $data = [
             'postID'     => $this->postID,
             'metakey'    => $name,
             'metavalue'  => !empty($_POST[$name]) ? $_POST[$name] : '',
             'attributes' => $attributes
-        );
+        ];
 
         // Callback Function, pass in value as data argument.
         return (call_user_func($attributes['callback'], $data) === false) ? false : true;
