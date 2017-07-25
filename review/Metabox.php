@@ -114,24 +114,28 @@ class Metabox
         add_action('init', function() 
         {
             // Initiate if in adminstrator area.
-            if ($this->validateSettings()) {
+            if (!$this->validateSettings()) {
 
-                // Check to see if assets already loaded, only load assets once.
-                if (!self::$assetsLoaded) {
+                return;
 
-                    self::$assetsLoaded = true;
-
-                    $this->addCDNAssets();
-                    $this->assetsHeader();
-                    $this->assetsFooter();
-                    $this->removeWPFeatures();
-
-                }
-
-                // Add & Save Metabox Init.
-                $this->initMetabox();
-                $this->initSavePost();
             }
+
+            // Check to see if assets already loaded, only load assets once.
+            if (!self::$assetsLoaded) {
+
+                self::$assetsLoaded = true;
+
+                $this->addCDNAssets();
+                $this->assetsHeader();
+                $this->assetsFooter();
+                $this->removeWPFeatures();
+
+            }
+
+            // Add & Save Metabox Init.
+            $this->initMetabox();
+            $this->initSavePost();
+            
         }, 
             15
         );
@@ -975,18 +979,8 @@ class Metabox
      */
     private function callback($name, $attributes)
     {
-        // Check if callback exists.
-        if (empty($attributes['callback'])) {
-
-            return true;
-
-        }
-
-        // Call self instead of class.
-        $attributes['callback'] = str_replace(['Metabox::', 'Metabox->'], 'self::', $attributes['callback']);
-
-        // Check if is callable.
-        if (!is_callable($attributes['callback'])) {
+        // Check if callback exists\Check if is callable.
+        if (empty($attributes['callback']) || !is_callable($attributes['callback'])) {
 
             return true;
 
