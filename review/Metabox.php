@@ -99,10 +99,8 @@ class Metabox
      */
     public function __construct()
     {
-
         // Set Post ID
         $this->setPostID();
-
     }
 
 
@@ -113,10 +111,8 @@ class Metabox
      */
     public function build()
     {
-
         add_action('init', function() 
         {
-
             // Initiate if in adminstrator area.
             if ($this->validateSettings()) {
 
@@ -136,11 +132,9 @@ class Metabox
                 $this->initMetabox();
                 $this->initSavePost();
             }
-
         }, 
             15
         );
-
     }
 
 
@@ -151,7 +145,6 @@ class Metabox
      */
     private function setPostID()
     {
-
         if (!empty($_POST['post_ID'])) {
 
             $this->postID = $_POST['post_ID'];
@@ -161,7 +154,6 @@ class Metabox
             $this->postID = $_GET['post'];
 
         }
-        
     }
 
 
@@ -173,7 +165,6 @@ class Metabox
      */
     public function setSettings($args = [])
     {
-
         // Check if arguments are empty.
         if (empty($args)) {
 
@@ -211,7 +202,6 @@ class Metabox
 
         // Set metabox object settings.
         $this->settings = array_merge($this->settings, $args);
-
     }
 
 
@@ -223,7 +213,6 @@ class Metabox
      */
     public function setFields($args = [])
     {
-
         // Check if arguments are empty.
         if (empty($args) || !is_array($args)) {
 
@@ -296,7 +285,6 @@ class Metabox
             }
 
         }
-
     }
 
 
@@ -307,10 +295,8 @@ class Metabox
      */
     private function addCDNAssets()
     {
-
         add_action('admin_enqueue_scripts', function()
         {
-
             // Remove Old ACF Versions of Select2
             wp_deregister_script('select2');
             wp_deregister_style('select2');
@@ -322,9 +308,7 @@ class Metabox
             // Add script to administrator area.
             wp_enqueue_script('select2-js', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js', ['jquery', 'jquery-ui-sortable'], null, false);
             wp_enqueue_script('select2-js');
-
         });
-
     }
 
 
@@ -335,14 +319,10 @@ class Metabox
      */
     private function assetsHeader()
     {
-
         add_action('admin_head', function()
         {
-
             echo file_get_contents(dirname(__FILE__). '/assets/metabox-styles.css');
-
         });
-
     }
 
 
@@ -353,16 +333,12 @@ class Metabox
      */
     private function assetsFooter()
     {
-
         add_action('admin_footer', function()
         {
-
             echo file_get_contents(dirname(__FILE__) . '/assets/metabox-scripts.js');
-
         },
             20
         );
-
     }
 
 
@@ -377,13 +353,11 @@ class Metabox
      */
     private function removeWPFeatures()
     {
-
         foreach ($this->settings['remove'] as $feature) {
 
             remove_post_type_support(get_post_type($this->postID), $feature);    
 
         }
-
     }
 
 
@@ -397,10 +371,8 @@ class Metabox
      */
     private function initMetabox()
     {
-
         add_action('add_meta_boxes', function()
         {
-
             // Add Metabox.
             add_meta_box(
                 'custom-metabox-' . $this->settings['id'],
@@ -421,9 +393,7 @@ class Metabox
                 });
 
             }
-
         });
-
     }
 
 
@@ -434,7 +404,6 @@ class Metabox
      */
     public function showMetaboxHTML()
     {
-
         // Add nonce for security and authentication.
         wp_nonce_field($this->nonceAction, $this->nonceName);
 
@@ -463,7 +432,6 @@ class Metabox
         }
 
         $this->getFields();
-
     }
 
 
@@ -475,7 +443,6 @@ class Metabox
      */
     private function getFields()
     {
-
         // Show headers and fields.
         foreach ($this->fields as $name => $attributes) {
 
@@ -560,7 +527,6 @@ class Metabox
             $this->getFieldHTML($name, $attributes);
 
         }
-
     }
 
 
@@ -572,7 +538,6 @@ class Metabox
      */
     private function getFieldHTML($name, $attributes)
     {
-
         // Extract array elements into variables.
         extract($attributes);
 
@@ -607,6 +572,7 @@ class Metabox
 
         // Dependencies.
         $dataDependency = '';
+
         if (!empty($dependency)) {
 
             $dataDependency  = !empty($dependency['key']) ? 'data-dependency-key="' . $dependency['key'] . '"' : '';
@@ -619,7 +585,6 @@ class Metabox
         echo '<div class="input-group type-' . $type . '" ' . $dataDependency . ' data-key="' . $name . '" data-type="' . $type . '">';
             include dirname(__FILE__) . '/fields/' . $type . '.php';
         echo '</div>';
-
     }
 
 
@@ -630,10 +595,8 @@ class Metabox
      */
     private function initSavePost()
     {
-
         add_action('save_post', function()
         {
-
             // Validation Check.
             if (!$this->validateSaveRequest()) {
 
@@ -764,9 +727,7 @@ class Metabox
                 );
 
             }
-
         });
-
     }
 
 
@@ -779,7 +740,6 @@ class Metabox
      */
     private function validateSaveRequest()
     {
-
         // Check if $_POST request.
         if (empty($_POST)) {
 
@@ -830,7 +790,6 @@ class Metabox
         }
 
         return true;
-
     }
 
 
@@ -1012,7 +971,6 @@ class Metabox
             }
 
         }
-
     }
 
 
@@ -1023,7 +981,6 @@ class Metabox
      */
     private function callback($name, $attributes)
     {
-
         // Check if callback exists.
         if (empty($attributes['callback'])) {
 
@@ -1051,9 +1008,7 @@ class Metabox
 
         // Callback Function, pass in value as data argument.
         return (call_user_func($attributes['callback'], $data) === false) ? false : true;
-
     }
-
 }
 
 
