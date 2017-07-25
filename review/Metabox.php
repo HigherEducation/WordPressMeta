@@ -48,7 +48,7 @@ class Metabox
      * Settings for Metabox
      * @var array
      */
-    private $settings = [
+    public $settings = [
         'title'        => 'Custom Meta',
         'id'           => '',
         'instructions' => '',
