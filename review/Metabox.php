@@ -302,12 +302,11 @@ class Metabox
             wp_deregister_style('select2');
 
             // Add styles to administrator area.
-            wp_register_style('select2-css', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css', false, '1.0.0');
+            wp_register_style('select2-css', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css', false, '4.0.3');
             wp_enqueue_style('select2-css');
 
             // Add script to administrator area.
             wp_enqueue_script('select2-js', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js', ['jquery', 'jquery-ui-sortable'], null, false);
-            wp_enqueue_script('select2-js');
         });
     }
 
@@ -583,7 +582,9 @@ class Metabox
 
         // Show field by input type.
         echo '<div class="input-group type-' . $type . '" ' . $dataDependency . ' data-key="' . $name . '" data-type="' . $type . '">';
+
             include dirname(__FILE__) . '/fields/' . $type . '.php';
+
         echo '</div>';
     }
 
@@ -828,7 +829,7 @@ class Metabox
 
             if (
                 (is_array($this->settings['post']) && in_array($this->postID, $this->settings['post'])) ||
-                ($this->settings['post'] == $this->postID)
+                $this->settings['post'] == $this->postID
             ) {
 
                 $hasPost = true;
@@ -936,7 +937,7 @@ class Metabox
                 !empty($template) &&
                 (
                     (is_array($this->settings['template']) && in_array($template, $this->settings['template'])) ||
-                    ($this->settings['template'] == $template)
+                    $this->settings['template'] == $template
                 )
             ) {
 
