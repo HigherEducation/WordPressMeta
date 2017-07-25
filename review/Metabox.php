@@ -27,14 +27,14 @@ class Metabox
      * A nonce name value used when validating the save request
      * @var string
      */
-    private $nonceName = 'custom_metabox_nonce';
+    public $nonceName = 'custom_metabox_nonce';
 
 
     /**
      * A nonce action used when validating the save request
      * @var string
      */
-    private $nonceAction = 'customMetaboxNonceAction';
+    public $nonceAction = 'customMetaboxNonceAction';
 
 
     /**
