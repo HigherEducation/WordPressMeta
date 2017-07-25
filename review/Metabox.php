@@ -808,13 +808,6 @@ class Metabox
         // vars.
         $hasPost = $hasPostType = $hasParent = $hasTaxonomy = $hasTemplates = ($this->settings['operator'] == 'AND');
 
-        // Check if admin.
-        if (!is_admin()) {
-
-            return false;
-
-        }
-
         // Check if post is empty.
         if (empty($this->postID)) {
 
