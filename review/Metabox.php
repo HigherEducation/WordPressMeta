@@ -20,7 +20,7 @@ class Metabox
      * Fields/Messages for Metabox
      * @var array
      */
-    private $fields = [];
+    public $fields = [];
 
 
     /**
