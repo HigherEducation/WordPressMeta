@@ -234,6 +234,14 @@ class Metabox
         // Setup fields.
         foreach ($args as $name => $attributes) {
 
+            // If Instructions/Snippet
+            if (is_int($name) && is_string($attributes)) {
+
+                $this->fields[]['snippet'] = $attributes;
+                continue;
+
+            }
+
             // Stored Value.
             $storedValue = get_post_meta($this->postID, $this->settings['prefix'] . $name, true);
 
@@ -260,6 +268,14 @@ class Metabox
             }
 
             foreach ($attributes['subfields'] as $subName => $subAttributes) {
+
+                // If Instructions/Snippet
+                if (is_int($subName) && is_string($subAttributes)) {
+
+                    $this->fields[$this->settings['prefix'] . $name]['subfields'][$subName] = array('snippet' => $subAttributes);
+                    continue;
+
+                }
 
                 // Prefix & Merge Attributes with defaults.
                 $this->fields[$this->settings['prefix'] . $name]['subfields'][$subName] = array_merge($this->fieldAttributes, $subAttributes);
@@ -414,10 +430,9 @@ class Metabox
 
     /**
      * Show Metabox Markup
-     * @param  object $post
      *
      */
-    public function showMetaboxHTML($post)
+    public function showMetaboxHTML()
     {
 
         // Add nonce for security and authentication.
@@ -447,7 +462,7 @@ class Metabox
 
         }
 
-        $this->getFields($this->fields);
+        $this->getFields();
 
     }
 
@@ -458,11 +473,11 @@ class Metabox
      * @param  string $name, array $attributes, string $storedValue
      *
      */
-    private function getFields($fields)
+    private function getFields()
     {
 
         // Show headers and fields.
-        foreach ($fields as $name => $attributes) {
+        foreach ($this->fields as $name => $attributes) {
 
             // Subfields.
             if (!empty($attributes['subfields'])) {
@@ -562,9 +577,9 @@ class Metabox
         extract($attributes);
 
         // HTML/Message Snippet.
-        if (empty($type) && is_int($name)) {
+        if (!empty($snippet)) {
 
-            echo '<div class="snippet">' . $attributes . '</div>';
+            echo '<div class="snippet">' . $snippet . '</div>';
             return;
 
         }
