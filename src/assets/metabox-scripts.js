@@ -182,8 +182,10 @@
 
         }
 
-        // Append new input group.
-        $addtions.eq(0).clone().appendTo($subfieldsContainer);
+        // Append new input group. Set temp input names.
+        var $copy = $addtions.eq(0).clone();
+        $copy.find(':input').attr('name', '');
+        $copy.appendTo($subfieldsContainer);
 
         // Remove Values, Select2, Editor.
         var $newAddition = $('[data-subfields-parent="' + parentKey + '"]').last();
