@@ -91,7 +91,6 @@ class Metabox
     ];
 
 
-
     /**
      * Construct
      * @param  array $args
@@ -102,7 +101,6 @@ class Metabox
         // Set Post ID
         $this->setPostID();
     }
-
 
 
     /**
@@ -135,12 +133,11 @@ class Metabox
             // Add & Save Metabox Init.
             $this->initMetabox();
             $this->initSavePost();
-            
+
         }, 
             15
         );
     }
-
 
 
     /**
@@ -159,7 +156,6 @@ class Metabox
 
         }
     }
-
 
 
     /**
@@ -207,7 +203,6 @@ class Metabox
         // Set metabox object settings.
         $this->settings = array_merge($this->settings, $args);
     }
-
 
 
     /**
@@ -292,7 +287,6 @@ class Metabox
     }
 
 
-
     /**
      * Custom Meta Assets(CSS & JS)
      *
@@ -315,7 +309,6 @@ class Metabox
     }
 
 
-
     /**
      * Header - Custom Meta Assets
      *
@@ -327,7 +320,6 @@ class Metabox
             echo file_get_contents(dirname(__FILE__). '/assets/metabox-styles.css');
         });
     }
-
 
 
     /**
@@ -343,7 +335,6 @@ class Metabox
             20
         );
     }
-
 
 
     /**
@@ -362,7 +353,6 @@ class Metabox
 
         }
     }
-
 
 
     /**
@@ -400,7 +390,6 @@ class Metabox
     }
 
 
-
     /**
      * Show Metabox Markup
      *
@@ -436,7 +425,6 @@ class Metabox
 
         $this->getFields();
     }
-
 
 
     /**
@@ -533,7 +521,6 @@ class Metabox
     }
 
 
-
     /**
      * Meta Field Markup
      * @param  string $name, array $attributes, string $storedValue
@@ -591,7 +578,6 @@ class Metabox
 
         echo '</div>';
     }
-
 
 
     /**
@@ -736,7 +722,6 @@ class Metabox
     }
 
 
-
     /**
      * Run through a series of tests to confirm that the save request
      * Is valid, including checking the nonce set up in metaboxHTML()
@@ -796,7 +781,6 @@ class Metabox
 
         return true;
     }
-
 
 
     /**
@@ -972,7 +956,6 @@ class Metabox
     }
 
 
-
     /**
      * Callback Method
      *
@@ -998,7 +981,6 @@ class Metabox
         return (call_user_func($attributes['callback'], $data) === false) ? false : true;
     }
 }
-
 
 
 /**
