@@ -13,14 +13,7 @@ class Metabox
      * Post ID
      * @var string
      */
-    private $postID = '';
-
-
-    /**
-     * Fields/Messages for Metabox
-     * @var array
-     */
-    public $fields = [];
+    private $postID;
 
 
     /**
@@ -41,14 +34,21 @@ class Metabox
      * Assets already loaded.
      * @var boolean
      */
-    static $assetsLoaded = false;
+    private static $assetsLoaded = false;
 
 
     /**
-     * Settings for Metabox
+     * Settings
      * @var array
      */
-    public $settings = [
+    public $settings = [];
+
+
+    /**
+     * Settings Defaults
+     * @var array
+     */
+    private $settingsDefaults = [
         'title'        => 'Custom Meta',
         'id'           => '',
         'instructions' => '',
@@ -58,7 +58,6 @@ class Metabox
         'taxonomy'     => [],
         'template'     => [],
         'prefix'       => '',
-        'operator'     => 'OR',
         'location'     => 'normal',
         'priority'     => 'high',
         'dependency'   => [],
@@ -67,10 +66,17 @@ class Metabox
 
 
     /**
-     * Acceptable Field Attributes for Metabox
+     * Fields.
      * @var array
      */
-    private $fieldAttributes = [
+    public $fields = [];
+
+
+    /**
+     * Field Defaults.
+     * @var array
+     */
+    private $fieldDefaults = [
         'type'        => '',
         'value'       => '',
         'label'       => '',
@@ -92,25 +98,19 @@ class Metabox
 
 
     /**
-     * Construct
-     * @param  array $args
-     *
-     */
-    public function __construct()
-    {
-        // Set Post ID
-        $this->setPostID();
-    }
-
-
-    /**
      * Build
      *
      */
     public function build()
     {
         add_action('init', function() 
-        {
+        {   
+            // Set Post ID.
+            $this->setPostID();
+
+            // Setup Settings.
+            $this->setupSettings();
+
             // Initiate if in adminstrator area.
             if (!$this->validateSettings()) {
 
@@ -130,10 +130,10 @@ class Metabox
 
             }
 
-            // Add & Save Metabox Init.
+            // Setup Fields, Create Metabox, Save Metabox.
+            $this->setupFields();
             $this->initMetabox();
             $this->initSavePost();
-
         }, 
             15
         );
@@ -163,64 +163,72 @@ class Metabox
      * @param  array $args
      *
      */
-    public function setSettings($args = [])
+    private function setupSettings()
     {
-        // Check if arguments are empty.
-        if (empty($args)) {
-
-            return;
-
-        }
-
         // Set Metabox ID.
-        if (empty($args['id'])) {
+        if (empty($this->settings['id'])) {
 
-            $args['id'] = rand(1, 100000);
+            $this->settings['id'] = rand(1, 100000);
 
         }
 
         // Set Prefix.
-        if (!empty($args['prefix'])) {
+        if (!empty($this->settings['prefix']) && substr($this->settings['prefix'], -1) != '_') {
 
-            $args['prefix'] .= '_';
-
-        }
-
-        // Set Remove WP Feautres.
-        if (!empty($args['remove']) && !is_array($args['remove'])) {
-
-            $args['remove'] = [$args['remove']];
+            $this->settings['prefix'] .= '_';
 
         }
 
-        // Set post type to array if string.
-        if (!empty($args['post_type']) && !is_array($args['post_type'])) {
+        // If Properties delcared as strings, convert to arrays.
+        foreach ($this->settings as $name => &$setting) {
 
-            $args['post_type'] = [$args['post_type']];
+            if (!empty($this->settings[$name]) && !is_array($this->settings[$name]) && is_array($this->settingsDefaults[$name])) {
+
+                $setting = [$this->settings[$name]];
+
+            }
+
+            if ($name == 'taxonomy') {
+
+                foreach ($setting as $taxonomy => &$term) {
+
+                    if (!empty($term) && !is_array($term)) {
+
+                        $term = [$term];
+
+                    }
+
+                }
+
+            }
 
         }
 
-        // Set metabox object settings.
-        $this->settings = array_merge($this->settings, $args);
+        // Defaults Settings + User Defined Settings.
+        $this->settings = array_merge($this->settingsDefaults, $this->settings);
     }
 
 
     /**
-     * Set Fields
+     * Setup Fields
      * @param  array $args
      *
      */
-    public function setFields($args = [])
+    private function setupFields()
     {
+
         // Check if arguments are empty.
-        if (empty($args) || !is_array($args)) {
+        if (empty($this->fields) || !is_array($this->fields)) {
 
             return;
 
         }
 
         // Setup fields.
-        foreach ($args as $name => $attributes) {
+        foreach ($this->fields as $name => $attributes) {
+
+            // Remove array item, only to re-build it below.
+            unset($this->fields[$name]);
 
             // If Instructions/Snippet
             if (is_int($name) && is_string($attributes)) {
@@ -246,7 +254,7 @@ class Metabox
             }
         
             // Prefix & Merge Attributes with defaults.
-            $this->fields[$this->settings['prefix'] . $name] = array_merge($this->fieldAttributes, $attributes);
+            $this->fields[$this->settings['prefix'] . $name] = array_merge($this->fieldDefaults, $attributes);
 
             // Subfields.
             if (empty($attributes['subfields'])) {
@@ -266,7 +274,7 @@ class Metabox
                 }
 
                 // Prefix & Merge Attributes with defaults.
-                $this->fields[$this->settings['prefix'] . $name]['subfields'][$subName] = array_merge($this->fieldAttributes, $subAttributes);
+                $this->fields[$this->settings['prefix'] . $name]['subfields'][$subName] = array_merge($this->fieldDefaults, $subAttributes);
 
                 // Add Values to subfields.
                 if (empty($valueArray)) {
@@ -280,9 +288,7 @@ class Metabox
                     $this->fields[$this->settings['prefix'] . $name]['subfields'][$subName]['values'][] = $value->$subName;
 
                 }
-
             }
-
         }
     }
 
@@ -371,7 +377,7 @@ class Metabox
                 'custom-metabox-' . $this->settings['id'],
                 $this->settings['title'],
                 [$this, 'showMetaboxHTML'],
-                $this->settings['operator'] == 'AND' ? $this->settings['post_type'] : null,
+                null,
                 $this->settings['location'],
                 $this->settings['priority']
             );
@@ -405,6 +411,7 @@ class Metabox
             $dataDependency  = !empty($this->settings['dependency']['key']) ? 'data-dependency-key="' . $this->settings['dependency']['key'] . '"' : '';
             $dataDependency .= !empty($this->settings['dependency']['value']) ? 'data-dependency-value=\'' . $this->settings['dependency']['value'] . '\'' : '';
             $dataDependency .= !empty($this->settings['dependency']['condition']) ? 'data-dependency-condition="' . $this->settings['dependency']['condition'] . '"' : '';
+            
             echo '<span ' . $dataDependency . ' data-key="custom-metabox-' . $this->settings['id'] . '" data-type="metabox"></span>';
 
         }
@@ -793,68 +800,36 @@ class Metabox
      */
     private function validateSettings()
     {
-        // vars.
-        $hasPost = $hasPostType = $hasParent = $hasTaxonomy = $hasTemplates = ($this->settings['operator'] == 'AND');
-
         // Check if post is empty.
         if (empty($this->postID)) {
 
-            return false;
+            return true;
 
         }
 
-        // Check if settings.posts is set.
-        if (!empty($this->settings['post'])) {
+        // Check if Post(s).
+        if (!empty($this->settings['post']) && in_array($this->postID, $this->settings['post'])) {
 
-            $hasPost = false;
-
-            if (
-                (is_array($this->settings['post']) && in_array($this->postID, $this->settings['post'])) ||
-                $this->settings['post'] == $this->postID
-            ) {
-
-                $hasPost = true;
-
-            }
+            return true;
 
         }
 
-        // Check if settings.parent is set.
-        if (!empty($this->settings['post_type'])) {
+        // Check if Post Type.
+        if (!empty($this->settings['post_type']) && in_array(get_post_type($this->postID), $this->settings['post_type'])) {
 
-            $hasPostType = false;
-
-            if (
-                (is_array($this->settings['post_type']) && in_array(get_post_type($this->postID), $this->settings['post_type'])) ||
-                $this->settings['post_type'] == get_post_type($this->postID)
-            ) {
-                
-                $hasPostType = true;
-
-            }
+            return true;
 
         }
 
-        // Check if settings.parent is set.
-        if (!empty($this->settings['parent'])) {
+        // Check if Parent.
+        if (!empty($this->settings['parent']) && in_array(wp_get_post_parent_id($this->postID), $this->settings['parent'])) {
 
-            $hasParent = false;
-
-            if (
-                (is_array($this->settings['parent']) && in_array(wp_get_post_parent_id($this->postID), $this->settings['parent'])) ||
-                $this->settings['parent'] == wp_get_post_parent_id($this->postID)
-            ) {
-
-                $hasParent = true;
-
-            }
+            return true;
 
         }
 
         // Check if settings.taxonomy is set.
-        if (!empty($this->settings['taxonomy']) && is_array($this->settings['taxonomy'])) {
-
-            $hasTaxonomy = false;
+        if (!empty($this->settings['taxonomy'])) {
 
             // Loop taxonomies & match terms for post.
             foreach ($this->settings['taxonomy'] as $taxonomyAllowed => $termsAllowed) {
@@ -873,86 +848,26 @@ class Metabox
                 foreach ($postTerms as $postTerm) {
 
                     // Check terms compared to user inputted array of values.
-                    if (
-                        (
-                            is_array($termsAllowed) &&
-                            (
-                                in_array($postTerm->slug, $termsAllowed) ||
-                                in_array($postTerm->term_id, $termsAllowed) ||
-                                in_array($postTerm->name, $termsAllowed)
-                            )
-                        ) ||
-                        (
-                            $postTerm->slug == $termsAllowed ||
-                            $postTerm->term_id == $termsAllowed ||
-                            $postTerm->name == $termsAllowed
-                        )
-                    ) {
+                    if (in_array($postTerm->slug, $termsAllowed) || in_array($postTerm->term_id, $termsAllowed) || in_array($postTerm->name, $termsAllowed)) {
 
-                        $hasTaxonomy = true;
-                        break;
+                        return true;
 
                     }
 
                 }
 
-                // Stop Loop once found true
-                if ($hasTaxonomy) {
-
-                    break;
-
-                }
-
             }
 
         }
 
-        // Check if settings.template is set.
-        if (!empty($this->settings['template'])) {
+        // Check if Template.
+        if (!empty($this->settings['template']) && in_array(get_page_template_slug($this->postID), $this->settings['template'])) {
 
-            // vars.
-            $hasTemplates = false;
-            $template     = get_page_template_slug($this->postID);
-
-            if (
-                !empty($template) &&
-                (
-                    (is_array($this->settings['template']) && in_array($template, $this->settings['template'])) ||
-                    $this->settings['template'] == $template
-                )
-            ) {
-
-                $hasTemplates = true;
-
-            }
+            return true;
 
         }
 
-        // Final Check
-        if ($this->settings['operator'] == 'AND') {
-
-            if (!$hasPost || !$hasPostType || !$hasParent || !$hasTaxonomy || !$hasTemplates) {
-
-                return false;
-
-            } else {
-
-                return true;
-
-            }
-
-        } else {
-
-            if ($hasPost || $hasPostType || $hasParent || $hasTaxonomy || $hasTemplates) {
-
-                return true;
-
-            } else {
-
-                return false;
-            }
-
-        }
+        return false;
     }
 
 
