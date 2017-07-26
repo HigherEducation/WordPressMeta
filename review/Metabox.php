@@ -411,7 +411,7 @@ class Metabox
             $dataDependency  = !empty($this->settings['dependency']['key']) ? 'data-dependency-key="' . $this->settings['dependency']['key'] . '"' : '';
             $dataDependency .= !empty($this->settings['dependency']['value']) ? 'data-dependency-value=\'' . $this->settings['dependency']['value'] . '\'' : '';
             $dataDependency .= !empty($this->settings['dependency']['condition']) ? 'data-dependency-condition="' . $this->settings['dependency']['condition'] . '"' : '';
-            
+
             echo '<span ' . $dataDependency . ' data-key="custom-metabox-' . $this->settings['id'] . '" data-type="metabox"></span>';
 
         }
@@ -449,6 +449,7 @@ class Metabox
 
                 // Dependencies.
                 $dataDependency = '';
+                
                 if (!empty($attributes['dependency'])) {
 
                     $dataDependency  = !empty($attributes['dependency']['key']) ? 'data-dependency-key="' . $attributes['dependency']['key'] . '"' : '';
