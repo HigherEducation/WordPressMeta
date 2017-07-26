@@ -1,23 +1,27 @@
 <?php
 
-    if (!empty($label)) {
+if (!empty($label)) {
+    echo '<span class="label">' . $label . ($required ? '<span class="required">*</span>' : '') . '</span>';
+}
 
-        echo '<span class="label">' . $label . ($required ? '<span class="required">*</span>' : '') . '</span>';
+echo $description;
 
-    }
-    
-    echo $description;
+foreach ($options as $optionLabel => $optionValue) :
+    $checked = $optionValue == $value ? ' checked="checked"' : '';
+    $id      = $name . '-' . $optionValue;
 
-    foreach ($options as $optionLabel => $optionValue) : ?>
+    ?>
 
-        <label for="<?php echo $name . '-' . $optionValue; ?>">
+    <label for="<?php echo $id; ?>">
 
-        <input type="radio" 
-               id="<?php echo $name . '-' . $optionValue; ?>" 
-               value="<?php echo $optionValue; ?>" 
-               name="<?php echo $name; ?>"
-               <?php if ($optionValue == $value) echo ' checked="checked"'; ?> />
-                    <?php echo $optionLabel; ?>
-               </label>
+    <input type="radio" 
+           name="<?php echo $name; ?>"
+           id="<?php echo $id; ?>" 
+           value="<?php echo $optionValue; ?>" 
+            <?php echo $checked; ?> />
+           
+    <?php echo $optionLabel; ?>
+        
+    </label>
 
-    <?php endforeach;
+<?php endforeach;
