@@ -1,0 +1,7 @@
+files:
+  include: 'src/**/*.scss'
+rules:
+  # Disallows
+  no-ids: 0
+  # Style Guide
+  property-sort-order: 0
