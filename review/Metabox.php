@@ -103,33 +103,35 @@ class Metabox
      */
     public function build()
     {
-        add_action('init', function () {
-            // Set Post ID.
-            $this->setPostID();
+        add_action(
+            'init',
+            function () {
+                // Set Post ID.
+                $this->setPostID();
 
-            // Setup Settings.
-            $this->setupSettings();
+                // Setup Settings.
+                $this->setupSettings();
 
-            // Initiate if in adminstrator area.
-            if (!$this->validateSettings()) {
-                return;
-            }
+                // Initiate if in adminstrator area.
+                if (!$this->validateSettings()) {
+                    return;
+                }
 
-            // Check to see if assets already loaded, only load assets once.
-            if (!self::$assetsLoaded) {
-                self::$assetsLoaded = true;
+                // Check to see if assets already loaded, only load assets once.
+                if (!self::$assetsLoaded) {
+                    self::$assetsLoaded = true;
 
-                $this->addCDNAssets();
-                $this->assetsHeader();
-                $this->assetsFooter();
-                $this->removeWPFeatures();
-            }
+                    $this->addCDNAssets();
+                    $this->assetsHeader();
+                    $this->assetsFooter();
+                    $this->removeWPFeatures();
+                }
 
-            // Setup Fields, Create Metabox, Save Metabox.
-            $this->setupFields();
-            $this->initMetabox();
-            $this->initSavePost();
-        },
+                // Setup Fields, Create Metabox, Save Metabox.
+                $this->setupFields();
+                $this->initMetabox();
+                $this->initSavePost();
+            },
             15
         );
     }
@@ -193,7 +195,6 @@ class Metabox
      */
     private function setupFields()
     {
-
         // Check if arguments are empty.
         if (empty($this->fields) || !is_array($this->fields)) {
             return;
