@@ -1,8 +1,8 @@
 {
     "name": "wordpressmeta",
     "description": "Meta toolbox for Wordpress",
-    "keywords": [ 
-        "WordPress", 
+    "keywords": [
+        "WordPress",
         "Custom Metabox",
         "Meta Information",
         "Meta Removal",
@@ -11,14 +11,13 @@
     ],
     "authors": [
         {
-            "name": "Jason Comes",
-            "email": "jcomes@highereducation.com",
-            "homepage": "http://www.highereducation.com",
-            "role": "Developer"
+            "name": "Higher Education",
+            "email": "frontend@highereducation.com",
+            "homepage": "http://www.highereducation.com"
         }
     ],
     "support": {
-        "email": "jcomes@highereducation.com"
+        "email": "frontend@highereducation.com"
     },
     "homepage": "http://www.highereducation.com",
     "autoload": {
