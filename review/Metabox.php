@@ -170,7 +170,10 @@ class Metabox
 
         // If Properties delcared as strings, convert to arrays.
         foreach ($this->settings as $name => &$setting) {
-            if (!empty($this->settings[$name]) && !is_array($this->settings[$name]) && is_array($this->settingsDefaults[$name])) {
+            if (!empty($this->settings[$name]) &&
+                !is_array($this->settings[$name]) &&
+                is_array($this->settingsDefaults[$name])
+            ) {
                 $setting = [$this->settings[$name]];
             }
 
@@ -202,7 +205,6 @@ class Metabox
 
         // Setup fields.
         foreach ($this->fields as $name => $attributes) {
-
             // Remove array item, only to re-build it below.
             unset($this->fields[$name]);
 
@@ -212,8 +214,11 @@ class Metabox
                 continue;
             }
 
+            // Set prefixed name.
+            $name = $this->settings['prefix'] . $name;
+
             // Stored Value.
-            $storedValue = get_post_meta($this->postID, $this->settings['prefix'] . $name, true);
+            $storedValue = get_post_meta($this->postID, $name, true);
 
             if (!empty($storedValue)) {
                 $attributes['value'] = $storedValue;
@@ -226,7 +231,7 @@ class Metabox
             }
         
             // Prefix & Merge Attributes with defaults.
-            $this->fields[$this->settings['prefix'] . $name] = array_merge($this->fieldDefaults, $attributes);
+            $this->fields[$name] = array_merge($this->fieldDefaults, $attributes);
 
             // Subfields.
             if (empty($attributes['subfields'])) {
@@ -234,15 +239,14 @@ class Metabox
             }
 
             foreach ($attributes['subfields'] as $subName => $subAttributes) {
-
                 // If Instructions/Snippet
                 if (is_int($subName) && is_string($subAttributes)) {
-                    $this->fields[$this->settings['prefix'] . $name]['subfields'][$subName] = ['snippet' => $subAttributes];
+                    $this->fields[$name]['subfields'][$subName] = ['snippet' => $subAttributes];
                     continue;
                 }
 
                 // Prefix & Merge Attributes with defaults.
-                $this->fields[$this->settings['prefix'] . $name]['subfields'][$subName] = array_merge($this->fieldDefaults, $subAttributes);
+                $this->fields[$name]['subfields'][$subName] = array_merge($this->fieldDefaults, $subAttributes);
 
                 // Add Values to subfields.
                 if (empty($valueArray)) {
@@ -250,7 +254,7 @@ class Metabox
                 }
 
                 foreach ($valueArray as $valueName => $value) {
-                    $this->fields[$this->settings['prefix'] . $name]['subfields'][$subName]['values'][] = $value->$subName;
+                    $this->fields[$name]['subfields'][$subName]['values'][] = $value->$subName;
                 }
             }
         }
@@ -269,11 +273,22 @@ class Metabox
             wp_deregister_style('select2');
 
             // Add styles to administrator area.
-            wp_register_style('select2-css', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css', false, '4.0.3');
+            wp_register_style(
+                'select2-css',
+                'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css',
+                false,
+                '4.0.3'
+            );
             wp_enqueue_style('select2-css');
 
             // Add script to administrator area.
-            wp_enqueue_script('select2-js', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js', ['jquery', 'jquery-ui-sortable'], null, false);
+            wp_enqueue_script(
+                'select2-js',
+                'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js',
+                ['jquery', 'jquery-ui-sortable'],
+                null,
+                false
+            );
         });
     }
 
@@ -344,10 +359,13 @@ class Metabox
 
             // Add dependency class to metabox container to initially hide.
             if (!empty($this->settings['dependency'])) {
-                add_filter('postbox_classes_' . get_post_type($this->postID) . '_custom-metabox-' . $this->settings['id'], function ($classes) {
-                    $classes[] = 'data-dependency-key';
-                    return $classes;
-                });
+                add_filter(
+                    'postbox_classes_' . get_post_type($this->postID) . '_custom-metabox-' . $this->settings['id'],
+                    function ($classes) {
+                        $classes[] = 'data-dependency-key';
+                        return $classes;
+                    }
+                );
             }
         });
     }
@@ -362,13 +380,15 @@ class Metabox
         // Add nonce for security and authentication.
         wp_nonce_field($this->nonceAction, $this->nonceName);
 
-        // Check for dependency.
+        // Condition Dependency.
         if (!empty($this->settings['dependency'])) {
-            $dataDependency  = !empty($this->settings['dependency']['key']) ? 'data-dependency-key="' . $this->settings['dependency']['key'] . '"' : '';
-            $dataDependency .= !empty($this->settings['dependency']['value']) ? 'data-dependency-value=\'' . $this->settings['dependency']['value'] . '\'' : '';
-            $dataDependency .= !empty($this->settings['dependency']['condition']) ? 'data-dependency-condition="' . $this->settings['dependency']['condition'] . '"' : '';
+            $condition  = ' data-dependency-key="' . $this->settings['dependency']['key'] . '"';
+            $condition .= ' data-dependency-value=\'' . $this->settings['dependency']['value'] . '\'';
+            $condition .= ' data-dependency-condition="' . $this->settings['dependency']['condition'] . '"';
 
-            echo '<span ' . $dataDependency . ' data-key="custom-metabox-' . $this->settings['id'] . '" data-type="metabox"></span>';
+            echo '<span data-key="custom-metabox-' . $this->settings['id'] . '" 
+                        data-type="metabox" 
+                        ' . $condition . '></span>';
         }
 
         // Show metabox instructions.
@@ -394,22 +414,23 @@ class Metabox
     {
         // Show headers and fields.
         foreach ($this->fields as $name => $attributes) {
-
             // Subfields.
             if (!empty($attributes['subfields'])) {
+                // Condition Dependency.
+                $condition = '';
 
-                // Dependencies.
-                $dataDependency = '';
-                
                 if (!empty($attributes['dependency'])) {
-                    $dataDependency  = !empty($attributes['dependency']['key']) ? 'data-dependency-key="' . $attributes['dependency']['key'] . '"' : '';
-                    $dataDependency .= !empty($attributes['dependency']['value']) ? 'data-dependency-value=\'' . $attributes['dependency']['value'] . '\'' : '';
-                    $dataDependency .= !empty($attributes['dependency']['condition']) ? 'data-dependency-condition="' . $attributes['dependency']['condition'] . '"' : '';
+                    $condition  = ' data-dependency-key="' . $attributes['dependency']['key'] . '"';
+                    $condition .= ' data-dependency-value=\'' . $attributes['dependency']['value'] . '\'' : '';
+                    $condition .= ' data-dependency-condition="' . $attributes['dependency']['condition'] . '"';
                 }
 
-                // Show field by input type.
-                echo '<div class="input-group type-object" ' . $dataDependency . ' data-key="' . $name . '" data-type="object">';
-
+                // Field markup.
+                echo '<div class="input-group type-object" 
+                           data-key="' . $name . '" 
+                           data-type="object" 
+                           ' . $condition . '>';
+            
                 // Set label if exists.
                 if (!empty($attributes['label'])) {
                     echo '<span class="label">' . $attributes['label'] . '</span>';
@@ -421,17 +442,32 @@ class Metabox
                 }
 
                 // Subfields.
-                echo '<div data-subfields-container="' . $name . '" ' . ($attributes['repeater'] ? 'data-repeater="true"' : '') . '>';
+                echo '<div data-subfields-container="' . $name . '" 
+                           ' . ($attributes['repeater'] ? 'data-repeater="true"' : '') . '>';
 
-                $count = !empty(reset($attributes['subfields'])['values']) ? count(reset($attributes['subfields'])['values']) : 1;
-                $count = $attributes['repeater'] ? $count : 1;
+                $count = 1;
+
+                if ($attributes['repeater'] && !empty(reset($attributes['subfields'])['values'])) {
+                    $count = count(reset($attributes['subfields'])['values'])
+                }
 
                 for ($i = 0; $i < $count; $i++) {
                     echo '<div data-subfields-parent="' . $name . '">';
 
                     foreach ($attributes['subfields'] as $subName => $subAttributes) {
-                        $subName = $attributes['repeater'] ? $name . '[' . $i . '][' . $subName . ']' : $name . '[' . $subName . ']';
-                        $subAttributes['value'] = !empty($subAttributes['values'][$i]) ? $subAttributes['values'][$i] : '';
+                        // Update Subname.
+                        if ($attributes['repeater']) {
+                            $subName = $name . '[' . $i . '][' . $subName . ']';
+                        } else {
+                            $subName = $name . '[' . $subName . ']';
+                        }
+                        
+                        // Update Value.
+                        $subAttributes['value'] = '';
+
+                        if (!empty($subAttributes['values'][$i])) {
+                            $subAttributes['value'] = $subAttributes['values'][$i];
+                        }
 
                         $this->getFieldHTML($subName, $subAttributes);
                     }
@@ -448,7 +484,9 @@ class Metabox
 
                 // If repeater.
                 if ($attributes['repeater']) {
-                    echo '<div class="button-controls"><button data-subfields-add="' . $name . '" class="button-primary">Add</button></div>';
+                    echo '<div class="button-controls">
+                            <button data-subfields-add="' . $name . '" class="button-primary">Add</button>
+                          </div>';
                 }
 
                 // End of Field Group.
@@ -471,7 +509,7 @@ class Metabox
      */
     private function getFieldHTML($name, $attributes)
     {
-        // Extract array elements into variables.
+        // Extract field attributes.
         extract($attributes);
 
         // HTML/Message Snippet.
@@ -480,34 +518,41 @@ class Metabox
             return;
         }
 
-        // Field type exists.
+        // Field exists.
         if (empty($type) || !file_exists(dirname(__FILE__) . '/fields/' . $type . '.php')) {
             echo '<div class="notification-error"><strong>Type</strong> is empty or field does not exist.</div>';
             return;
         }
 
-        // Select
+        // Multiselect, append [] to name.
         if ($type == 'select-multiple') {
             $name .= '[]';
         }
 
-        // Set label if exists.
-        $labelHTML = !empty($label) ? '<label for="' . $name . '">' . $label . ($required ? '<span class="required">*</span>' : '') . '</label>' : '';
-
-        // Set description if exists.
-        $descriptionHTML = !empty($description) ? '<div class="description">' . $description . '</div>' : '';
-
-        // Dependencies.
-        $dataDependency = '';
-
-        if (!empty($dependency)) {
-            $dataDependency  = !empty($dependency['key']) ? 'data-dependency-key="' . $dependency['key'] . '"' : '';
-            $dataDependency .= !empty($dependency['value']) ? 'data-dependency-value=\'' . $dependency['value'] . '\'' : '';
-            $dataDependency .= !empty($dependency['condition']) ? 'data-dependency-condition="' . $dependency['condition'] . '"' : '';
+        // Label html.
+        $labelHTML = '';
+        if (!empty($label)) {
+            $requiredHTML = $required ? '<span class="required">*</span>' : '';
+            $labelHTML    = '<label for="' . $name . '">' . $label . $requiredHTML . '</label>';
         }
 
-        // Show field by input type.
-        echo '<div class="input-group type-' . $type . '" ' . $dataDependency . ' data-key="' . $name . '" data-type="' . $type . '">';
+        // Description html.
+        $descriptionHTML = !empty($description) ? '<div class="description">' . $description . '</div>' : '';
+
+        // Conditional dependency.
+        $condition = '';
+
+        if (!empty($dependency)) {
+            $condition  = ' data-dependency-key="' . $dependency['key'] . '"';
+            $condition .= ' data-dependency-value=\'' . $dependency['value'] . '\'';
+            $condition .= ' data-dependency-condition="' . $dependency['condition'] . '"';
+        }
+
+        // Field group.
+        echo '<div class="input-group type-' . $type . '" 
+                   data-key="' . $name . '" 
+                   data-type="' . $type . '"
+                   ' . $condition . '>';
 
         include dirname(__FILE__) . '/fields/' . $type . '.php';
 
@@ -529,7 +574,6 @@ class Metabox
 
             // Loop through Meta Fields.
             foreach ($this->fields as $name => $attributes) {
-
                 // Check if key exists.
                 if (!array_key_exists($name, $_POST)) {
                     continue;
@@ -552,7 +596,9 @@ class Metabox
                                     continue;
                                 }
 
-                                if (!empty($attributes['subfields'][$inputName]) && $attributes['subfields'][$inputName]['type'] == 'select2-multiple') {
+                                if (!empty($attributes['subfields'][$inputName]) &&
+                                    $attributes['subfields'][$inputName]['type'] == 'select2-multiple'
+                                ) {
                                     $inputValue = explode(',', $inputValue);
                                 }
 
@@ -565,7 +611,9 @@ class Metabox
                                 continue;
                             }
 
-                            if (!empty($attributes['subfields'][$inputName]) && $attributes['subfields'][$inputName]['type'] == 'select2-multiple') {
+                            if (!empty($attributes['subfields'][$inputName]) &&
+                                $attributes['subfields'][$inputName]['type'] == 'select2-multiple'
+                            ) {
                                 $inputValue = explode(',', $inputValue);
                             }
 
@@ -683,26 +731,30 @@ class Metabox
         }
 
         // Check if Post(s).
-        if (!empty($this->settings['post']) && in_array($this->postID, $this->settings['post'])) {
+        if (!empty($this->settings['post']) &&
+            in_array($this->postID, $this->settings['post'])
+        ) {
             return true;
         }
 
         // Check if Post Type.
-        if (!empty($this->settings['post_type']) && in_array(get_post_type($this->postID), $this->settings['post_type'])) {
+        if (!empty($this->settings['post_type']) &&
+            in_array(get_post_type($this->postID), $this->settings['post_type'])
+        ) {
             return true;
         }
 
         // Check if Parent.
-        if (!empty($this->settings['parent']) && in_array(wp_get_post_parent_id($this->postID), $this->settings['parent'])) {
+        if (!empty($this->settings['parent']) &&
+            in_array(wp_get_post_parent_id($this->postID), $this->settings['parent'])
+        ) {
             return true;
         }
 
         // Check if settings.taxonomy is set.
         if (!empty($this->settings['taxonomy'])) {
-
             // Loop taxonomies & match terms for post.
             foreach ($this->settings['taxonomy'] as $taxonomyAllowed => $termsAllowed) {
-
                 // Get post terms based on taxonomy.
                 $postTerms = get_the_terms($this->postID, $taxonomyAllowed);
 
@@ -713,9 +765,11 @@ class Metabox
 
                 // Loop through post terms in taxonomy.
                 foreach ($postTerms as $postTerm) {
-
                     // Check terms compared to user inputted array of values.
-                    if (in_array($postTerm->slug, $termsAllowed) || in_array($postTerm->term_id, $termsAllowed) || in_array($postTerm->name, $termsAllowed)) {
+                    if (in_array($postTerm->slug, $termsAllowed) ||
+                        in_array($postTerm->term_id, $termsAllowed) ||
+                        in_array($postTerm->name, $termsAllowed)
+                    ) {
                         return true;
                     }
                 }
@@ -723,7 +777,9 @@ class Metabox
         }
 
         // Check if Template.
-        if (!empty($this->settings['template']) && in_array(get_page_template_slug($this->postID), $this->settings['template'])) {
+        if (!empty($this->settings['template']) &&
+            in_array(get_page_template_slug($this->postID), $this->settings['template'])
+        ) {
             return true;
         }
 
