@@ -1,0 +1,30 @@
+{
+  "name": "WordPressMeta",
+  "version": "1.0.0",
+  "description": "Higher Education: WordPress Custom Meta Boxes",
+  "dependencies": {},
+  "devDependencies": {
+    "babel-eslint": "^7.2.3",
+    "eslint": "^4.0.0",
+    "npm-run-all": "^4.0.2",
+    "run-sequence": "^1.2.2",
+    "sass-lint": "^1.10.2"
+  },
+  "eslintConfig": {
+    "extends": "eslint:recommended",
+    "parser": "babel-eslint",
+    "parserOptions": {
+      "sourceType": "module"
+    },
+    "env": {
+      "browser": true,
+      "jquery": true
+    }
+  },
+  "scripts": {
+    "lint:php": "phpcs --standard=PSR2 --extensions=php .",
+    "lint:js": "eslint .",
+    "lint:sass": "sass-lint -vq --max-warnings=0",
+    "test": "run-s -c lint:* -s"
+  }
+}
