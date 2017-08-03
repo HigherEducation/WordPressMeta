@@ -37,7 +37,8 @@ function pluginCSV($data)
 
     // Save CSV JSON
     update_post_meta(
-        $_POST['post_ID'], 'csv_json_' . str_replace('csv_url_', '', $data['metakey']),
+        $_POST['post_ID'],
+        'csv_json_' . str_replace('csv_url_', '', $data['metakey']),
         wp_slash($csvImport)
     );
 }

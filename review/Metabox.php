@@ -334,6 +334,13 @@ class Metabox
         foreach ($this->settings['remove'] as $feature) {
             remove_post_type_support(get_post_type($this->postID), $feature);
         }
+
+        // Remove Spacing Issue
+        if (in_array('title', $this->settings['remove']) &&
+            in_array('editor', $this->settings['remove'])
+        ) {
+            echo '<style>#post-body-content { display:none; }</style>';
+        }
     }
 
 
@@ -421,7 +428,7 @@ class Metabox
 
                 if (!empty($attributes['dependency'])) {
                     $condition  = ' data-dependency-key="' . $attributes['dependency']['key'] . '"';
-                    $condition .= ' data-dependency-value=\'' . $attributes['dependency']['value'] . '\'' : '';
+                    $condition .= ' data-dependency-value=\'' . $attributes['dependency']['value'] . '\'';
                     $condition .= ' data-dependency-condition="' . $attributes['dependency']['condition'] . '"';
                 }
 
@@ -448,7 +455,7 @@ class Metabox
                 $count = 1;
 
                 if ($attributes['repeater'] && !empty(reset($attributes['subfields'])['values'])) {
-                    $count = count(reset($attributes['subfields'])['values'])
+                    $count = count(reset($attributes['subfields'])['values']);
                 }
 
                 for ($i = 0; $i < $count; $i++) {
