@@ -103,9 +103,7 @@ class Metabox
      */
     public function build()
     {
-        add_action(
-            'init',
-            function () {
+        add_action('init', function () {
                 // Set Post ID.
                 $this->setPostID();
 
@@ -131,7 +129,7 @@ class Metabox
                 $this->setupFields();
                 $this->initMetabox();
                 $this->initSavePost();
-            },
+        },
             15
         );
     }
@@ -170,7 +168,8 @@ class Metabox
 
         // If Properties delcared as strings, convert to arrays.
         foreach ($this->settings as $name => &$setting) {
-            if (!empty($this->settings[$name]) &&
+            if (
+                !empty($this->settings[$name]) &&
                 !is_array($this->settings[$name]) &&
                 is_array($this->settingsDefaults[$name])
             ) {
@@ -336,7 +335,8 @@ class Metabox
         }
 
         // Remove Spacing Issue
-        if (in_array('title', $this->settings['remove']) &&
+        if (
+            in_array('title', $this->settings['remove']) && 
             in_array('editor', $this->settings['remove'])
         ) {
             echo '<style>#post-body-content { display:none; }</style>';
@@ -480,7 +480,7 @@ class Metabox
                     }
 
                     if ($count > 1) {
-                        echo '<button class="button-remove">x</button>';
+                        echo '<button class="button-remove">&#10005;</button>';
                     }
 
                     echo '</div>';
