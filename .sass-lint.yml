@@ -1,5 +1,5 @@
 files:
-  include: 'src/**/*.scss'
+  include: 'src/**/*.s+(a|c)ss'
 rules:
   # Disallows
   no-ids: 0

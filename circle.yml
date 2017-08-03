@@ -3,6 +3,6 @@ machine:
     version: 6.11.0
   pre:
     - sudo apt-get update; USE_PRECOMPILE=true sudo -E circleci-install php 7.1.0
-    - sudo apt-get install php-codesniffer
+    - sudo apt-get install php-codesniffer=3.0.2
   php:
     version: 7.1.0
