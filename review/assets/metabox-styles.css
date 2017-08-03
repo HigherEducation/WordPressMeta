@@ -225,18 +225,15 @@
 
 /* Subfields */
 [data-subfields-parent] {
-  background-color: #f4f4f4;
-  border: 1px solid #efefef;
+  background-color: #ececec;
+  border: 1px solid #d4d4d4;
   border-top: 0;
   padding: 1px 15px 15px;
   position: relative;
 }
 
-[data-repeater="true"] [data-subfields-parent] {
-}
-
 [data-subfields-parent]:first-child {
-  border: 1px solid #efefef;
+  border: 1px solid #d4d4d4;
 }
 
 [data-subfields-parent] .button-remove {
@@ -255,6 +252,30 @@
   top: 0;
   transform: translateY(-50%);
   width: 25px;
+}
+
+/* Repeater Subfields */
+[data-repeater="true"] {
+  counter-reset: section;
+}
+
+[data-repeater="true"] [data-subfields-parent]::before {
+  counter-increment: section;
+  content: counter(section); 
+  background-color: #ececec;
+  border: 1px solid #d4d4d4;
+  border-bottom-left-radius: 1px;
+  border-top-left-radius: 1px;
+  border-right: 0;
+  display: block;
+  font-size: 11px;
+  height: 45px;
+  left: -31px;
+  line-height: 45px;
+  position: absolute;
+  text-align: center;
+  top: -1px;
+  width: 30px;
 }
 
 </style>
