@@ -267,7 +267,9 @@ class Metabox
      */
     private function addCDNAssets()
     {
-        add_action('admin_enqueue_scripts', function () {
+        add_action(
+            'admin_enqueue_scripts', 
+            function () {
             // Remove Old ACF Versions of Select2
             wp_deregister_script('select2');
             wp_deregister_style('select2');
@@ -299,9 +301,12 @@ class Metabox
      */
     private function assetsHeader()
     {
-        add_action('admin_head', function () {
-            echo file_get_contents(dirname(__FILE__). '/assets/metabox-styles.css');
-        });
+        add_action(
+            'admin_head', 
+            function () {
+                echo file_get_contents(dirname(__FILE__). '/assets/metabox-styles.css');
+            }
+        );
     }
 
 
@@ -331,6 +336,10 @@ class Metabox
      */
     private function removeWPFeatures()
     {
+        if (empty($this->settings['remove'])) {
+            return;
+        }
+
         foreach ($this->settings['remove'] as $feature) {
             remove_post_type_support(get_post_type($this->postID), $feature);
         }
@@ -650,20 +659,14 @@ class Metabox
 
                 // If is value is array
                 if (is_array($_POST[$name])) {
-                    $_POST[$name] = wp_slash(
-                        stripslashes(
-                            json_encode(
-                                $_POST[$name],
-                                JSON_PRETTY_PRINT|JSON_HEX_QUOT|JSON_HEX_APOS
-                            )
-                        )
-                    );
+                    $_POST[$name] = array_map('stripslashes_deep', $_POST[$name]);
+                    $_POST[$name] = wp_slash(json_encode($_POST[$name], JSON_PRETTY_PRINT|JSON_HEX_QUOT|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS));
 
                     if (JSON_ERROR_NONE != json_last_error()) {
                         throw new \Exception('JSON encoding failed with error:' . json_last_error_msg());
                     }
                 }
-
+                
                 // Update Post Meta Fields.
                 update_post_meta(
                     $this->postID,
@@ -808,8 +811,8 @@ class Metabox
         // Data attribute of callback.
         $data = [
             'postID'     => $this->postID,
-            'metakey'    => $name,
-            'metavalue'  => !empty($_POST[$name]) ? $_POST[$name] : '',
+            'name'       => $name,
+            'value'      => !empty($_POST[$name]) ? $_POST[$name] : '',
             'attributes' => $attributes
         ];
 
