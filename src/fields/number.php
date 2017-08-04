@@ -1,18 +1,19 @@
 <?php
 
-    echo $labelHTML;
-    echo $descriptionHTML;
+echo $labelHTML;
+echo $descriptionHTML;
+
+$attributes  = $value ? ' value="' . esc_attr($value) . '"' : '';
+$attributes .= $style ? ' style="' . $style . '"' : '';
+$attributes .= $placeholder ? ' placeholder="' . $placeholder . '"' : '';
+$attributes .= $pattern ? ' pattern="' . $pattern . '"' : '';
+$attributes .= $readonly ? ' readonly' : '';
+$attributes .= $maxlength ? ' maxlength="' . $maxlength . '"' : '';
+$attributes .= $min ? ' min="' . $min . '"' : '';
+$attributes .= $max ? ' max="' . $max . '"' : '';
+$attributes .= $maxlength ? ' maxlength="' . $maxlength . '"' : '';
+$attributes .= $required ? ' required' : '';
 
 ?>
 
-<input type="number" 
-       name="<?php echo $name; ?>"
-       <?php if ($value) echo ' value="' . esc_attr($value) . '"'; ?>
-       <?php if ($style) echo ' style="' . $style . '"'; ?>
-       <?php if ($placeholder) echo ' placeholder="' . $placeholder . '"'; ?>
-       <?php if ($pattern) echo ' pattern="' . $pattern . '"'; ?>
-       <?php if ($required) echo ' required'; ?>
-       <?php if ($readonly) echo ' readonly'; ?>
-       <?php if ($min) echo ' min="' . $min . '"'; ?>
-       <?php if ($max) echo ' max="' . $max . '"'; ?>
-       <?php if ($maxlength) echo ' maxlength="' . $maxlength . '"'; ?>/>
+<input type="number" name="<?php echo $name; ?>" <?php echo $attributes; ?>/>

@@ -7,46 +7,37 @@
  */
 function pluginCSV($data)
 {   
+    $postID = $_POST['post_ID'];
+    $name   = $data['name'];
+    $value  = !empty($_POST[$name]) ? $_POST[$name] : $data['value'];
 
     // No Meta Key.
-    if (empty($data['metakey'])) {
-
+    if (empty($name)) {
         return;
-
     }
 
     // Check for Value.
-    if (!empty($_POST[$data['metakey']])) {
-
+    if (!empty($value)) {
         // Init Class.
         $csv = new \CsvImporter();
 
         // Determine if remote or local.
-        if (filter_var($_POST[$data['metakey']], FILTER_VALIDATE_URL)) {
-
-            $csv->Remote = $_POST[$data['metakey']];
-
+        if (filter_var($value, FILTER_VALIDATE_URL)) {
+            $csv->Remote = $value;
         } else {
-
-            $csv->Local = WP_CONTENT_DIR . str_replace('/wp-content', '', $_POST[$data['metakey']]);
-
+            $csv->Local = WP_CONTENT_DIR . str_replace('/wp-content', '', $value);
         }
 
         // Get CSV
-        $csvImport = $csv->get();
-
+        $value = $csv->get();
     }
     
     // # Delete meta if $metavalue or CSV Import is empty.
-    if (empty($_POST[$data['metakey']]) || empty($csvImport)) {
-
-        delete_post_meta($_POST['post_ID'], 'csv_json_' . str_replace('csv_url_', '', $data['metakey']));
-
+    if (empty($value)) {
+        delete_post_meta($postID, 'csv_json_' . str_replace('csv_url_', '', $name));
         return;
-
     }
 
     // # Save CSV JSON
-    update_post_meta($_POST['post_ID'], 'csv_json_' . str_replace('csv_url_', '', $data['metakey']), wp_slash($csvImport));
-
+    update_post_meta($postID, 'csv_json_' . str_replace('csv_url_', '', $name), wp_slash($value));
 }

@@ -55,28 +55,21 @@ class Meta
 
         // Check if shortcut arguments are set.
         if (empty($args) || (empty($args['meta']) && empty($args['query']))) {
-
             return;
-
         }
 
         // Set query if argument query are set in shortcut arguments.
         if (!empty($args['query']) && is_array($args['query'])) {
-
             $this->setQuery($args['query']);
-
         }
 
         // Set meta if argument meta are set in shortcut arguments.
         if (!empty($args['meta']) && is_array($args['meta'])) {
-
             $this->setMeta($args['meta']);
-
         }
 
         // Iniitate shortcut setup.
         $this->init();
-
     }
 
 
@@ -90,14 +83,11 @@ class Meta
 
         // Check if arguments are empty.
         if (empty($args)) {
-
             return;
-
         }
 
         // Set metabox object settings.
         $this->query = array_merge($this->query, $args);
-
     }
 
 
@@ -110,59 +100,44 @@ class Meta
     {
         // Check if arguments are empty.
         if (empty($args)) {
-
             return;
-
         }
 
         // $_GET - Specific Meta Field.
         if (!empty($_GET['metakey']) && !empty($_GET['action'])) {
-
             // Update
             if ($_GET['action'] == 'update') {
-
                 $this->meta = array($_GET['metakey'] => array(
                     $_GET['metavalue'],
                     $_GET['value']
                 ));
                 return;
-
             }
 
             // Remove
             if ($_GET['action'] == 'remove') {
-
                 $this->meta = array($_GET['metakey'] => $_GET['metavalue']);
                 return;
-
             }
-
         }
 
         // Check if single value, convert into array.
         if (!is_array($args)) {
-
-           $this->meta = array($args => '*');
-           return;
-
+            $this->meta = array($args => '*');
+            return;
         }
 
         // Set if numberic, set keys & wildcard.
         foreach ($args as $key => $value) {
-
             // Set wildcard selector.
             if (is_numeric($key) && !is_array($value)) {
-
                 $this->meta[$value] = '*';
                 continue;
-
             }
 
             // Build meta array.
             $this->meta[$key] = $value;
-
         }
-
     }
 
 
@@ -175,9 +150,7 @@ class Meta
 
         // Check for needed `?meta=1` and logged in to even run.
         if (empty($_GET['meta']) || !current_user_can('administrator')) {
-
             return;
-
         }
 
         // Get result posts.
@@ -185,10 +158,8 @@ class Meta
 
         // Update/Removal Database call.
         if (!empty($_GET['id']) && !empty($_GET['action'])) {
-
             $this->updateDatabase($_GET['action']);
             return;
-
         }
 
         // Show markup.
@@ -208,7 +179,6 @@ class Meta
 
         // Pluck only IDs from results in array.
         $this->posts = wp_list_pluck($query->posts, 'post_title', 'ID');
-
     }
 
 
@@ -229,121 +199,94 @@ class Meta
 
         // Set custom WP arguments.
         if (!empty($this->query['wp_args']) && is_array($this->query['wp_args'])) {
-
             $arguments = array_merge($arguments, $this->query['wp_args']);
-
         }
 
         // Get post by slug
         if (!empty($this->query['slug'])) {
-
             $arguments['name'] = $this->query['slug'];
-
         }
 
         // Get posts, this trumps everything else.
         if (!empty($this->query['post'])) {
-
             $arguments['post__in'] = self::helperToArray($this->query['post']);
-
         }
 
         // Get posts in certain post types.
         if (!empty($this->query['post_type'])) {
-
             $arguments['post_type'] = self::helperToArray($this->query['post_type']);
-
         }
 
         // Get children posts with parent post.
         if (!empty($this->query['parent'])) {
-
             $arguments['post_parent__in'] = self::helperToArray($this->query['parent']);
-
         }
 
         // Get post with taxonomy terms.
         if (!empty($this->query['taxonomy'])) {
-
             $taxonomyQuery = array();
 
             foreach ($this->query['taxonomy'] as $taxomony => $terms) {
-
                 $termCheck       = is_array($terms) ? $terms[0] : $terms;
                 $taxonomyQuery[] = array(
                     'taxonomy' => $taxomony,
                     'field'    => is_numeric($termCheck) ? 'term_id' : 'slug',
                     'terms'    => $terms,
                 );
-
             }
 
             $arguments['tax_query'] = $taxonomyQuery;
             $arguments['tax_query']['relation'] = 'OR';
-
         }
 
         // Get post assigned to template.
         if (!empty($this->query['template'])) {
-
             $templates      = self::helperToArray($this->query['template']);
             $templatesArray = array();
             $templatesArray['relation'] = 'OR';
 
             foreach ($templates as $template) {
-
                 $templatesArray[] = array(
                     'key'     => '_wp_page_template',
                     'value'   => $template,
                     'compare' => 'LIKE',
                 );
-
             }
 
             $arguments['meta_query'][] = $templatesArray;
-
         }
 
         // Get post by meta meta speicified.
         if (!empty($this->meta)) {
-
             $metaArray['relation'] = 'OR';
 
             // Loop defined meta meta.
             foreach ($this->meta as $key => $value) {
-
                 $value     = is_array($value) ? $value[0] : $value;
                 $metaArray = array('key' => $key);
 
                 if ($value != '*') {
-
                     $metaArray = array_merge($metaArray, array(
                         'value'   => $value,
                         'compare' => '=',
                     ));
-
                 }
 
                 $arguments['meta_query'][] = $metaArray;
-
             }
 
             $arguments['meta_query']['relation'] = 'OR';
-
         }
 
         // $_GET - Specific post, if selected to remove/update.
         if (!empty($_GET['id']) && is_numeric($_GET['id'])) {
-
             $arguments['page_id'] = $_GET['id'];
 
             unset($arguments['post__in']);
-
         }
 
         // Return arguments.
         return $arguments;
-
     }
 
 
@@ -355,9 +298,7 @@ class Meta
     {
         // Only specific actions allowed.
         if ($action != 'remove' && $action != 'update') {
-
             return;
-
         }
 
         // Declare $wpdb global variable.
@@ -365,10 +306,8 @@ class Meta
 
         // Loop defined posts.
         foreach ($this->posts as $post => $title) {
-
             // Loop defined meta meta.
             foreach ($this->meta as $key => $value) {
-
                 // Get value, whether its in an update array or individual string value.
                 $metaValue = is_array($value) ? $value[0] : $value;
                 $result    = false;
@@ -381,46 +320,35 @@ class Meta
 
                 // If specific, update where arg.
                 if ($metaValue != '*') {
-
                     $where = array_merge($where, array('meta_value' => $metaValue));
-
                 }
 
                 // Delete.
                 if ($action == 'remove') {
-
                     $result = $wpdb->delete(
                         $wpdb->postmeta,
                         $where
                     );
-
                 }
 
                 // Update.
                 if ($action == 'update' && is_array($value)) {
-
                     $result = $wpdb->update(
                         $wpdb->postmeta,
                         array('meta_value' => $value[1]),
                         $where
                     );
-
                 }
 
                 // If row effected, add to results list.
                 if ($result) {
-
                     $this->results[$post][$key] = $value;
-
                 }
-
             }
-
         }
 
         // Show markup.
         $this->showMarkup();
-
     }
 
 
@@ -442,7 +370,6 @@ class Meta
 
         // Halt everything else.
         die();
-
     }
 
 
@@ -454,13 +381,9 @@ class Meta
     {
 
         if (empty($value)) {
-
             return array();
-
         }
 
         return is_array($value) ? $value : array($value);
-
     }
-    
 }

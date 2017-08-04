@@ -172,7 +172,7 @@
         // vars.
         var parentKey           = $(this).data('subfields-add');
         var $subfieldsContainer = $('[data-subfields-container="' + parentKey + '"]');
-        var buttonHTML          = '<button class="button-remove">x</button>';
+        var buttonHTML          = '<button class="button-remove">&#10005;</button>';
         var $addtions           = $('[data-subfields-parent="' + parentKey + '"]');
 
         // Add button if more than 1.

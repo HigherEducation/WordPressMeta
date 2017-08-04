@@ -1,25 +1,25 @@
-<?php 
+<?php
 
-    $valueArray = is_array($value) ? $value : json_decode($value, true);
+if (!empty($label)) {
+    echo '<label for="' . $name . '">' . $label . ($required ? '<span class="required">*</span>' : '') . '</label>';
+}
 
-    if (!empty($label)) {
+echo $descriptionHTML;
 
-        echo '<label for="' . $name . '">' . $label . ($required ? '<span class="required">*</span>' : '') . '</label>';
-        
-    }
-
-    echo $descriptionHTML;
+$valueArray = is_array($value) ? $value : json_decode($value, true);
+$attributes = $style ? ' style="' . $style . '"' : '';
+$attributes .= $required ? ' required' : '';
 
 ?>
 
-<select name="<?php echo $name; ?>" 
-        multiple="multiple"
-        <?php if ($required) echo ' required'; ?> 
-        <?php if ($style) echo ' style="' . $style . '"'; ?>>
+<select name="<?php echo $name; ?>" multiple="multiple" <?php echo $attributes; ?>>
 
-    <?php foreach ($options as $optionLabel => $optionValue) : ?>
+    <?php
+    foreach ($options as $optionLabel => $optionValue) :
+        $selected = !empty($valueArray) && in_array($optionValue, $valueArray) ? 'selected="selected"' : '';
+    ?>
 
-        <option value="<?php echo $optionValue; ?>" <?php if (!empty($valueArray) && in_array($optionValue, $valueArray)) echo 'selected="selected"'; ?>><?php echo $optionLabel; ?></option>
+    <option value="<?php echo $optionValue; ?>" <?php echo $selected; ?>><?php echo $optionLabel; ?></option>
     
     <?php endforeach; ?>
 

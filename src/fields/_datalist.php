@@ -1,24 +1,28 @@
-<?php 
+<?php
 
 echo $labelHTML;
 echo $descriptionHTML;
 
+$attributes  = $value ? ' value="' . $value . '"' : '';
+$attributes .= $placeholder ? ' placeholder="' . $placeholder . '"' : '';
+$attributes .= $maxlength ? ' maxlength="' . $maxlength . '"' : '';
+$attributes .= $required ? ' required' : '';
+$attributes .= $maxlength ? ' maxlength="' . $maxlength . '"' : '';
+$attributes .= $readonly ? ' readonly' : '';
+$attributes .= ' class="input-datalist"';
+
 ?>
 
-<input list="<?php echo $name; ?>" 
-       name="<?php echo $name; ?>" 
-       value="<?php echo $value; ?>" 
-       placeholder="<?php echo $placeholder; ?>" 
-       class="input-datalist" 
-       <?php if ($required) echo 'required'; ?> 
-       <?php if ($maxlength) echo 'maxlength="' . $maxlength . '"'; ?> 
-       <?php if ($readonly) echo 'readonly'; ?> />
+<input list="<?php echo $name; ?>" name="<?php echo $name; ?>"  <?php $attributes; ?> />
 
 <datalist id="<?php echo $name; ?>">
 
-    <?php foreach ($options as $optionLabel => $optionValue) : ?>
+    <?php
+    foreach ($options as $optionLabel => $optionValue) :
+        $selected = $optionValue == $value ? ' selected="selected"' : '';
+    ?>
 
-        <option value="<?php echo $optionValue; ?>" <?php if ($optionValue = $value) echo 'selected="selected"'; ?>><?php echo $optionLabel; ?></option>
+    <option value="<?php echo $optionValue; ?>" <?php echo $selected; ?>><?php echo $optionLabel; ?></option>
 
     <?php endforeach; ?>
 
