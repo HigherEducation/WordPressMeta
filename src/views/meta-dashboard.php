@@ -189,11 +189,7 @@ function confirmResults(message) {
                         // Remove link.
                         $messageRemove = '\'Remove ' . strtoupper($key) . ' from ' . $title . '?\'';
                         $metaHTML .= ' <a class="link-remove" 
-                                          href="' . home_url() . '?meta=1
-                                          &id=' . $post_id . '
-                                          &metakey=' . $key . '
-                                          &metavalue=' . $storedValue . '
-                                          &action=remove" 
+                                          href="' . home_url() . '?meta=1&id=' . $post_id . '&metakey=' . $key . '&metavalue=' . $storedValue . '&action=remove" 
                                           onclick="return confirmResults(' . $messageRemove . ')">Remove</a>';
 
                         // Update link.
@@ -222,11 +218,7 @@ function confirmResults(message) {
                     $metaHTML .= '<pre>';
                     $metaHTML .= '<strong>' . $key . '</strong> = ' . $value[0];
                     $metaHTML .= ' <a class="link-remove" 
-                                          href="' . home_url() . '?meta=1
-                                          &id=' . $post_id . '
-                                          &metakey=' . $key . '
-                                          &metavalue=' . $value[0] . '
-                                          &action=remove" 
+                                          href="' . home_url() . '?meta=1&id=' . $post_id . '&metakey=' . $key . '&metavalue=' . $value[0] . '&action=remove" 
                                           onclick="return confirmResults(' . $messageRemove . ')">Remove</a>';
                     $metaHTML .= '</pre>';
                 }
@@ -245,15 +237,11 @@ function confirmResults(message) {
                 if (!empty($this->meta)) {
                     if ($hasUpdate) {
                         $messageUpdate = '\'Update Meta from ' . $title . '?\'';
-                        echo ' - <a href="' . home_url() . '?meta=1
-                                    &id=' . $post_id . '
-                                    &action=update" 
+                        echo ' - <a href="' . home_url() . '?meta=1&id=' . $post_id . '&action=update" 
                                     onclick="return confirmResults(' . $messageUpdate  . ')">Update</a>';
                     }
                     $messageRemove = '\'Remove Meta from ' . $title . '?\'';
-                    echo ' - <a href="' . home_url() . '?meta=1
-                                &id=' . $post_id . '
-                                &action=remove" 
+                    echo ' - <a href="' . home_url() . '?meta=1&id=' . $post_id . '&action=remove" 
                                 onclick="return confirmResults(' . $messageRemove . ')">Remove</a>';
                 }
 
