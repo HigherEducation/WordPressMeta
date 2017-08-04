@@ -1,4 +1,4 @@
- <?php
+<?php
 
 /**
  * Plugin - CSV : 'csv_json_{metakey}'
@@ -6,7 +6,7 @@
  *
  */
 function pluginCSV($data)
-{   
+{
     $postID = $_POST['post_ID'];
     $name   = $data['name'];
     $value  = !empty($_POST[$name]) ? $_POST[$name] : $data['value'];
