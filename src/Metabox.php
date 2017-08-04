@@ -268,30 +268,31 @@ class Metabox
     private function addCDNAssets()
     {
         add_action(
-            'admin_enqueue_scripts', 
+            'admin_enqueue_scripts',
             function () {
             // Remove Old ACF Versions of Select2
-            wp_deregister_script('select2');
-            wp_deregister_style('select2');
+                wp_deregister_script('select2');
+                wp_deregister_style('select2');
 
             // Add styles to administrator area.
-            wp_register_style(
-                'select2-css',
-                'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css',
-                false,
-                '4.0.3'
-            );
-            wp_enqueue_style('select2-css');
+                wp_register_style(
+                    'select2-css',
+                    'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css',
+                    false,
+                    '4.0.3'
+                );
+                wp_enqueue_style('select2-css');
 
             // Add script to administrator area.
-            wp_enqueue_script(
-                'select2-js',
-                'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js',
-                ['jquery', 'jquery-ui-sortable'],
-                null,
-                false
-            );
-        });
+                wp_enqueue_script(
+                    'select2-js',
+                    'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js',
+                    ['jquery', 'jquery-ui-sortable'],
+                    null,
+                    false
+                );
+            }
+        );
     }
 
 
@@ -302,7 +303,7 @@ class Metabox
     private function assetsHeader()
     {
         add_action(
-            'admin_head', 
+            'admin_head',
             function () {
                 echo file_get_contents(dirname(__FILE__). '/assets/metabox-styles.css');
             }
@@ -319,7 +320,9 @@ class Metabox
         add_action(
             'admin_footer',
             function () {
+                echo '<script>';
                 echo file_get_contents(dirname(__FILE__) . '/assets/metabox-scripts.js');
+                echo '</script>';
             },
             20
         );
@@ -660,7 +663,12 @@ class Metabox
                 // If is value is array
                 if (is_array($_POST[$name])) {
                     $_POST[$name] = array_map('stripslashes_deep', $_POST[$name]);
-                    $_POST[$name] = wp_slash(json_encode($_POST[$name], JSON_PRETTY_PRINT|JSON_HEX_QUOT|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS));
+                    $_POST[$name] = wp_slash(
+                        json_encode(
+                            $_POST[$name],
+                            JSON_PRETTY_PRINT|JSON_HEX_QUOT|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS
+                        )
+                    );
 
                     if (JSON_ERROR_NONE != json_last_error()) {
                         throw new \Exception('JSON encoding failed with error:' . json_last_error_msg());

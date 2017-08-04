@@ -363,7 +363,9 @@ class Meta
         echo file_get_contents(dirname(__FILE__). '/assets/meta-styles.css');
 
         // Inline scripts.
+        echo '<script>';
         echo file_get_contents(dirname(__FILE__). '/assets/meta-scripts.js');
+        echo '</script>';
 
         // Dashboard view.
         include dirname(__FILE__) . '/views/meta-dashboard.php';
