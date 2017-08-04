@@ -27,30 +27,24 @@
             <th>
 
                 <h5>Meta</h5>
-                <?php 
+                <?php
 
-                    $hasUpdates  = false;
+                $hasUpdates  = false;
                     
-                    // Meta loop.
-                    if (!empty($this->meta)) {
+                // Meta loop.
+                if (!empty($this->meta)) {
+                    foreach ($this->meta as $key => $value) {
+                        $valueHTML = is_array($value) ? $value[0] . ' => ' . $value[1] : $value;
+                        echo '<pre><strong>' . $key . '</strong> = ' . $valueHTML . '</pre>';
 
-                        foreach ($this->meta as $key => $value) {
-
-                            echo '<pre><strong>' . $key . '</strong> = ' . (is_array($value) ? $value[0] . ' => ' . $value[1] : $value) . '</pre>';
-
-                            // If has updates.
-                            if (is_array($value) && !$hasUpdates) {
-
-                                $hasUpdates = true;
-                            }
-
+                        // If has updates.
+                        if (is_array($value) && !$hasUpdates) {
+                            $hasUpdates = true;
                         }
-
-                    } else {
-
-                        echo '<pre>Meta data not set.</pre>';
-
                     }
+                } else {
+                    echo '<pre>Meta data not set.</pre>';
+                }
 
                 ?>
                 <hr />
@@ -58,80 +52,62 @@
                 <h5>Query</h5>
                 <?php
 
-                    $hasSettings = false;
+                $hasSettings = false;
 
-                    // Loop Queries.
-                    foreach ($this->query as $setting => $value) {
-
-                        if (empty($value)) {
-
-                            continue;
-
-                        }
-
-                        $hasSettings = true;
-
-                        echo '<h6>' . $setting . '</h6>';
-                        echo '<pre>';
-                        echo is_array($value) ? print_r($value) : $value;
-                        echo '</pre>';
-
+                // Loop Queries.
+                foreach ($this->query as $setting => $value) {
+                    if (empty($value)) {
+                        continue;
                     }
 
-                    // Has no settings.
-                    if (!$hasSettings) {
+                    $hasSettings = true;
 
-                        echo '<pre>Query arguments not set, all post(s) queried.</pre>';
+                    echo '<h6>' . $setting . '</h6>';
+                    echo '<pre>';
+                    echo is_array($value) ? print_r($value) : $value;
+                    echo '</pre>';
+                }
 
-                    }
+                // Has no settings.
+                if (!$hasSettings) {
+                    echo '<pre>Query arguments not set, all post(s) queried.</pre>';
+                }
 
                 ?>
                 <hr />
 
                 <h5>Results</h5>
-                <?php 
+                <?php
 
-                    // Count, Results || Posts, if not 0 posts.
-                    if(!empty($this->results)) {
+                // Count, Results || Posts, if not 0 posts.
+                if (!empty($this->results)) {
+                    echo '<pre>' . count($this->results) . ' Post(s) Effected</pre>';
+                } elseif (!empty($this->posts) && empty($_GET['action'])) {
+                    echo '<pre>' . count($this->posts) . ' Post(s)</pre>';
+                } else {
+                    echo '<pre>0 Post(s)</pre>';
+                }
 
-                        echo '<pre>' . count($this->results) . ' Post(s) Effected</pre>';
-
-                    } elseif (!empty($this->posts) && empty($_GET['action'])) {
-
-                        echo '<pre>' . count($this->posts) . ' Post(s)</pre>';
-
-                    } else {
-
-                        echo '<pre>0 Post(s)</pre>';
-
+                // Actions.
+                if (empty($_GET['action']) && !empty($this->posts)) {
+                    if ($hasUpdates) {
+                        $messageUpdate = '\'Update Meta from all ' . count($this->posts) . ' post(s)?\'';
+                        echo '<a class="btn-update" 
+                                 onclick="return confirmResults(' . $messageUpdate . ')" 
+                                 href="' . home_url() . '?meta=1&id=all&action=update">Update All Meta Results</a>';
                     }
-
-                    // Actions.
-                    if (empty($_GET['action']) && !empty($this->posts)) {
-
-                        if ($hasUpdates) {
-
-                            echo '<a class="btn-update" 
-                                     onclick="return confirmResults(\'Update Meta from all ' . count($this->posts) . ' post(s)?\')" 
-                                     href="' . home_url() . '?meta=1&id=all&action=update">Update All Meta Results</a>'; 
-                        
-                        }
-                        if (!empty($this->meta)) {
-
-                            echo '<a class="btn-remove"
-                                     onclick="return confirmResults(\'Remove Meta from all ' . count($this->posts) . ' post(s)?\')" 
+                    if (!empty($this->meta)) {
+                        $messageRemove = '\'Remove Meta from all ' . count($this->posts) . ' post(s)?\'';
+                        echo '<a class="btn-remove"
+                                     onclick="return confirmResults(' . $messageRemove . ')" 
                                      href="' . home_url() . '?meta=1&id=all&action=remove">Remove All Meta Results</a>';
-                        
-                        }
-
                     }
+                }
 
-                    // Back.
-                    if (!empty($_GET['id'])) {
-
-                        echo '<a class="btn-back" href="' . home_url() . '?meta=1">Back</a>';
-
-                    }
+                // Back.
+                if (!empty($_GET['id'])) {
+                    echo '<a class="btn-back" href="' . home_url() . '?meta=1">Back</a>';
+                }
 
                 ?>
             </th>
@@ -146,142 +122,135 @@
 
     <?php
 
-        // Results.
-        if(!empty($this->results)) : 
+    // Results.
+    if (!empty($this->results)) :
+        foreach ($this->results as $post_id => $meta) :
+    ?> 
+        <tr>
+            <td>
+                <strong><?php echo $this->posts[$post_id]; ?> </strong><br />
+                <strong>ID: </strong><?php echo $post_id; ?> <br /><br />
+                <a href="<?php echo get_permalink($post_id); ?>">View Post</a> - 
+                <a href="<?php echo admin_url('post.php?post=' . $post_id . '&action=edit'); ?>">Edit Post</a>
+            </td>
+            <td>
+            <?php
 
-            foreach ($this->results as $post_id => $meta) : 
+            if (!empty($meta)) {
+                foreach ($meta as $key => $value) {
+                    echo '<pre class="' . $_GET['action'] . '"><strong>' . $key . '</strong> = ';
+
+                    if ($_GET['action'] == 'remove') {
+                        echo is_array($value) ? $value[0] : $value;
+                    } elseif ($_GET['action'] == 'update' && is_array($value)) {
+                        echo $value[0] . ' => ' . $value[1];
+                    }
+
+                    echo '</pre>';
+                }
+            }
+
+            ?>
+            </td>
+            <tr>
+    <?php
+        endforeach;
+    elseif (!empty($this->posts) && empty($_GET['action'])) :
+        foreach ($this->posts as $post_id => $title) :
+            $metaHTML  = '';
+            $hasUpdate = false;
+
+            // Meta values.
+            if (!empty($this->meta)) {
+                foreach ($this->meta as $key => $value) {
+                    // Setup key & get stored value.
+                    $definedValue = is_array($value) ? $value[0] : $value;
+                    $storedValue  = get_post_meta($post_id, $key, true);
+
+                    if ((metadata_exists('post', $post_id, $key)) &&
+                        ($storedValue || $storedValue == '0' || $storedValue == '') &&
+                        ($definedValue == '*' || $definedValue == $storedValue)
+                    ) {
+                        $metaHTML .= '<pre>';
+                        $metaHTML .= '<strong>' . $key . '</strong> = ' . $storedValue;
+
+                        // Remove link.
+                        $messageRemove = '\'Remove ' . strtoupper($key) . ' from ' . $title . '?\'';
+                        $metaHTML .= ' <a class="link-remove" 
+                                          href="' . home_url() . '?meta=1
+                                          &id=' . $post_id . '
+                                          &metakey=' . $key . '
+                                          &metavalue=' . $storedValue . '
+                                          &action=remove" 
+                                          onclick="return confirmResults(' . $messageRemove . ')">Remove</a>';
+
+                        // Update link.
+                        if (is_array($value)) {
+                            $hasUpdate = true;
+                            $messageUpdate = '\'Update ' . strtoupper($key) . ' from ' . $title . '?\'';
+                            $metaHTML .= ' <a class="link-update" 
+                                              href="' . home_url() . '?meta=1
+                                              &id=' . $post_id . '
+                                              &metakey=' . $key . '
+                                              &metavalue=' . $storedValue . '
+                                              &value=' . $value[1] . '
+                                              &action=update" 
+                                              onclick="return confirmResults(' . $messageUpdate . ')">Update</a>';
+                        }
+
+                        $metaHTML .= '</pre>';
+                    }
+                }
+            } else {
+                // Show all metafields.
+                $meta = get_post_meta($post_id);
+
+                foreach ($meta as $key => $value) {
+                    $messageRemove ='\'Remove ' . strtoupper($key) . ' from ' . $title . '?\'';
+                    $metaHTML .= '<pre>';
+                    $metaHTML .= '<strong>' . $key . '</strong> = ' . $value[0];
+                    $metaHTML .= ' <a class="link-remove" 
+                                          href="' . home_url() . '?meta=1
+                                          &id=' . $post_id . '
+                                          &metakey=' . $key . '
+                                          &metavalue=' . $value[0] . '
+                                          &action=remove" 
+                                          onclick="return confirmResults(' . $messageRemove . ')">Remove</a>';
+                    $metaHTML .= '</pre>';
+                }
+            }
 
         ?> 
-            <tr>
-                <td>
-                    <strong><?php echo $this->posts[$post_id]; ?> </strong><br />
-                    <strong>ID: </strong><?php echo $post_id; ?> <br /><br />
-                    <a href="<?php echo get_permalink($post_id); ?>">View Post</a> - 
-                    <a href="<?php echo admin_url('post.php?post=' . $post_id . '&action=edit'); ?>">Edit Post</a>
-                </td>
-                <td>
-                <?php 
 
-                    if (!empty($meta)) {
+        <tr>
+            <td>
+                <strong><?php echo $title; ?></strong><br />
+                <strong>ID: </strong><?php echo $post_id; ?><br /><br />
+                <a href="<?php echo get_permalink($post_id); ?>">View</a> 
+                - <a href="<?php echo admin_url('post.php?post=' . $post_id . '&action=edit'); ?>">Edit</a>
+                <?php
 
-                        foreach ($meta as $key => $value) {
-
-                            echo '<pre class="' . $_GET['action'] . '"><strong>' . $key . '</strong> = ';
-
-                            if ($_GET['action'] == 'remove') {
-
-                                echo is_array($value) ? $value[0] : $value;
-
-                            } elseif ($_GET['action'] == 'update' && is_array($value)) {
-
-                                echo $value[0] . ' => ' . $value[1];
-
-                            }
-
-                            echo '</pre>';
-
-                        }
-
-                    }
-
-                ?>
-                </td>
-            <tr>
-    <?php 
-
-            endforeach; 
-
-        elseif (!empty($this->posts) && empty($_GET['action'])) : 
-
-            foreach ($this->posts as $post_id => $title) :
-
-                $metaHTML  = '';
-                $hasUpdate = false;
-
-                // Meta values.
                 if (!empty($this->meta)) {
-
-                    foreach ($this->meta as $key => $value) {
-
-                        // Setup key & get stored value.
-                        $definedValue = is_array($value) ? $value[0] : $value;
-                        $storedValue  = get_post_meta($post_id, $key, true);
-
-                        if (
-                            (metadata_exists('post', $post_id, $key)) &&
-                            ($storedValue || $storedValue == '0' || $storedValue == '') &&
-                            ($definedValue == '*' || $definedValue == $storedValue)
-                        ) {
-
-                            $metaHTML .= '<pre>';
-                            $metaHTML .= '<strong>' . $key . '</strong> = ' . $storedValue;
-
-                            // Remove link.
-                            $metaHTML .= ' <a class="link-remove" 
-                                              href="' . home_url() . '?meta=1&id=' . $post_id . '&metakey=' . $key . '&metavalue=' . $storedValue . '&action=remove" 
-                                              onclick="return confirmResults(\'Remove ' . strtoupper($key) . ' from ' . $post_id . ': ' . $title . '?\')">Remove</a>';
-
-                            // Update link.
-                            if (is_array($value)) {
-
-                                $hasUpdate = true;
-                                $metaHTML .= ' <a class="link-update" 
-                                              href="' . home_url() . '?meta=1&id=' . $post_id . '&metakey=' . $key . '&metavalue=' . $storedValue . '&value=' . $value[1] . '&action=update" 
-                                              onclick="return confirmResults(\'Update ' . strtoupper($key) . ' from ' . $post_id . ': ' . $title . '?\')">Update</a>';
-                            
-                            }
-
-                            $metaHTML .= '</pre>';
-
-                        }
-
+                    if ($hasUpdate) {
+                        $messageUpdate = '\'Update Meta from ' . $title . '?\'';
+                        echo ' - <a href="' . home_url() . '?meta=1
+                                    &id=' . $post_id . '
+                                    &action=update" 
+                                    onclick="return confirmResults(' . $messageUpdate  . ')">Update</a>';
                     }
-
-                } else {
-
-                    // Show all metafields.
-                    $meta = get_post_meta($post_id);
-
-                    foreach ($meta as $key => $value) {
-
-                        $metaHTML .= '<pre>';
-                        $metaHTML .= '<strong>' . $key . '</strong> = ' . $value[0];
-                        $metaHTML .= ' <a class="link-remove" 
-                                          href="' . home_url() . '?meta=1&id=' . $post_id . '&metakey=' . $key . '&metavalue=' . $value[0] . '&action=remove" 
-                                          onclick="return confirmResults(\'Remove ' . strtoupper($key) . ' from ' . $post_id . ': ' . $title . '?\')">Remove</a>';
-                        $metaHTML .= '</pre>';
-                        
-                    }
-
+                    $messageRemove = '\'Remove Meta from ' . $title . '?\'';
+                    echo ' - <a href="' . home_url() . '?meta=1
+                                &id=' . $post_id . '
+                                &action=remove" 
+                                onclick="return confirmResults(' . $messageRemove . ')">Remove</a>';
                 }
 
-        ?> 
-
-            <tr>
-                <td>
-                    <strong><?php echo $title; ?></strong><br />
-                    <strong>ID: </strong><?php echo $post_id; ?><br /><br />
-                    <a href="<?php echo get_permalink($post_id); ?>">View</a> 
-                    - <a href="<?php echo admin_url('post.php?post=' . $post_id . '&action=edit'); ?>">Edit</a>
-                    <?php 
-
-                        if (!empty($this->meta)) {
-
-                            if ($hasUpdate) {
-
-                                echo ' - <a href="' . home_url() . '?meta=1&id=' . $post_id . '&action=update" onclick="return confirmResults(\'Update Meta from ' . $post_id . ': ' . $title . '?\')">Update</a>';
-                            
-                            }
-                            
-                            echo ' - <a href="' . home_url() . '?meta=1&id=' . $post_id . '&action=remove" onclick="return confirmResults(\'Remove Meta from ' . $post_id . ': ' . $title . '?\')">Remove</a>';
-                        
-                        }
-
-                    ?>
+                ?>
                 </td>
                 <td><?php echo $metaHTML; ?></td>
             <tr>
 
-    <?php endforeach; endif; ?>
+        <?php endforeach;
+    endif; ?>
 
 </table>

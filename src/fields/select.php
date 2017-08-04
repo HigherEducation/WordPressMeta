@@ -1,17 +1,21 @@
 <?php
 
-    echo $labelHTML;
-    echo $descriptionHTML;
+echo $labelHTML;
+echo $descriptionHTML;
+
+$attributes  = $style ? ' style="' . $style . '"' : '';
+$attributes .= $required ? ' required' : '';
 
 ?>
 
-<select name="<?php echo $name; ?>"
-        <?php if ($required) echo ' required'; ?> 
-        <?php if ($style) echo ' style="' . $style . '"'; ?>>
+<select name="<?php echo $name; ?>" <?php echo $attributes; ?>>
 
-    <?php foreach ($options as $optionLabel => $optionValue) : ?>
+    <?php
+    foreach ($options as $optionLabel => $optionValue) :
+        $selected = $optionValue == $value ? 'selected="selected"' : '';
+    ?>
 
-       <option value="<?php echo $optionValue; ?>" <?php if ($optionValue == $value) echo 'selected="selected"'; ?>><?php echo $optionLabel; ?></option>
+   <option value="<?php echo $optionValue; ?>" <?php echo $selected; ?>><?php echo $optionLabel; ?></option>
 
     <?php endforeach; ?>
 

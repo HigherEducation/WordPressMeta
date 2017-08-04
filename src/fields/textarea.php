@@ -1,11 +1,12 @@
 <?php
 
-    echo $labelHTML;
-    echo $descriptionHTML;
+echo $labelHTML;
+echo $descriptionHTML;
+
+$attributes  = $style ? ' style="' . $style . '"' : '';
+$attributes .= $readonly ? ' readonly' : '';
+$attributes .= $required ? ' required' : '';
     
 ?>
 
-<textarea name="<?php echo $name; ?>"
-          <?php if ($required) echo ' required'; ?>
-          <?php if ($style) echo ' style="' . $style . '"'; ?>
-          <?php if ($readonly) echo ' readonly'; ?>><?php echo esc_textarea($value); ?></textarea>
+<textarea name="<?php echo $name; ?>" <?php echo $attributes; ?>><?php echo esc_textarea($value); ?></textarea>

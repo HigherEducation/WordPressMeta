@@ -13,70 +13,76 @@ class Metabox
      * Post ID
      * @var string
      */
-    private $postID = '';
-
-
-    /**
-     * Fields/Messages for Metabox
-     * @var array
-     */
-    private $fields = array();
+    private $postID;
 
 
     /**
      * A nonce name value used when validating the save request
      * @var string
      */
-    private $nonceName = 'custom_metabox_nonce';
+    public $nonceName = 'custom_metabox_nonce';
 
 
     /**
      * A nonce action used when validating the save request
      * @var string
      */
-    private $nonceAction = 'customMetaboxNonceAction';
+    public $nonceAction = 'customMetaboxNonceAction';
 
 
     /**
      * Assets already loaded.
      * @var boolean
      */
-    static $assetsLoaded = false;
+    private static $assetsLoaded = false;
 
 
     /**
-     * Settings for Metabox
+     * Settings
      * @var array
      */
-    private $settings = array(
+    public $settings = [];
+
+
+    /**
+     * Settings Defaults
+     * @var array
+     */
+    private $settingsDefaults = [
         'title'        => 'Custom Meta',
         'id'           => '',
         'instructions' => '',
-        'post_type'    => array(),
-        'post'         => array(),
-        'parent'       => array(),
-        'taxonomy'     => array(),
-        'template'     => array(),
+        'post_type'    => [],
+        'post'         => [],
+        'parent'       => [],
+        'taxonomy'     => [],
+        'template'     => [],
         'prefix'       => '',
-        'operator'     => 'OR',
         'location'     => 'normal',
         'priority'     => 'high',
-        'dependency'   => array(),
-        'remove'       => array('custom-fields')
-    );
+        'dependency'   => [],
+        'remove'       => ['custom-fields']
+    ];
 
 
     /**
-     * Acceptable Field Attributes for Metabox
+     * Fields.
      * @var array
      */
-    private $fieldAttributes = array(
+    public $fields = [];
+
+
+    /**
+     * Field Defaults.
+     * @var array
+     */
+    private $fieldDefaults = [
         'type'        => '',
         'value'       => '',
         'label'       => '',
         'description' => '',
         'placeholder' => '',
-        'options'     => array(),
+        'options'     => [],
         'required'    => false,
         'pattern'     => '',
         'style'       => '',
@@ -84,27 +90,11 @@ class Metabox
         'max'         => '',
         'maxlength'   => '',
         'readonly'    => false,
-        'dependency'  => array(),
+        'dependency'  => [],
         'repeater'    => false,
-        'subfields'   => array(),
+        'subfields'   => [],
         'callback'    => '',
-    );
-
-
-
-    /**
-     * Construct
-     * @param  array $args
-     *
-     */
-    public function __construct()
-    {
-
-        // Set Post ID
-        $this->setPostID();
-
-    }
-
+    ];
 
 
     /**
@@ -113,36 +103,38 @@ class Metabox
      */
     public function build()
     {
+        add_action(
+            'init',
+            function () {
+            // Set Post ID.
+                $this->setPostID();
 
-        add_action('init', function() 
-        {
+            // Setup Settings.
+                $this->setupSettings();
 
             // Initiate if in adminstrator area.
-            if ($this->validateSettings()) {
+                if (!$this->validateSettings()) {
+                    return;
+                }
 
-                // Check to see if assets already loaded, only load assets once.
+            // Check to see if assets already loaded, only load assets once.
                 if (!self::$assetsLoaded) {
-
                     self::$assetsLoaded = true;
 
                     $this->addCDNAssets();
                     $this->assetsHeader();
                     $this->assetsFooter();
                     $this->removeWPFeatures();
-
                 }
 
-                // Add & Save Metabox Init.
+            // Setup Fields, Create Metabox, Save Metabox.
+                $this->setupFields();
                 $this->initMetabox();
                 $this->initSavePost();
-            }
-
-        }, 
+            },
             15
         );
-
     }
-
 
 
     /**
@@ -151,19 +143,12 @@ class Metabox
      */
     private function setPostID()
     {
-
         if (!empty($_POST['post_ID'])) {
-
             $this->postID = $_POST['post_ID'];
-
         } elseif (!empty($_GET['post'])) {
-
             $this->postID = $_GET['post'];
-
         }
-        
     }
-
 
 
     /**
@@ -171,134 +156,109 @@ class Metabox
      * @param  array $args
      *
      */
-    public function setSettings($args = array())
+    private function setupSettings()
     {
-
-        // Check if arguments are empty.
-        if (empty($args)) {
-
-            return;
-
-        }
-
         // Set Metabox ID.
-        if (empty($args['id'])) {
-
-            $args['id'] = rand(1, 100000);
-
+        if (empty($this->settings['id'])) {
+            $this->settings['id'] = rand(1, 100000);
         }
 
         // Set Prefix.
-        if (!empty($args['prefix'])) {
-
-            $args['prefix'] .= '_';
-
+        if (!empty($this->settings['prefix']) && substr($this->settings['prefix'], -1) != '_') {
+            $this->settings['prefix'] .= '_';
         }
 
-        // Set Remove WP Feautres.
-        if (!empty($args['remove']) && !is_array($args['remove'])) {
+        // If Properties delcared as strings, convert to arrays.
+        foreach ($this->settings as $name => &$setting) {
+            if (!empty($this->settings[$name]) &&
+                !is_array($this->settings[$name]) &&
+                is_array($this->settingsDefaults[$name])
+            ) {
+                $setting = [$this->settings[$name]];
+            }
 
-            $args['remove'] = array($args['remove']);
-
+            if ($name == 'taxonomy') {
+                foreach ($setting as $taxonomy => &$term) {
+                    if (!empty($term) && !is_array($term)) {
+                        $term = [$term];
+                    }
+                }
+            }
         }
 
-        // Set post type to array if string.
-        if (!empty($args['post_type']) && !is_array($args['post_type'])) {
-
-            $args['post_type'] = array($args['post_type']);
-
-        }
-
-        // Set metabox object settings.
-        $this->settings = array_merge($this->settings, $args);
-
+        // Defaults Settings + User Defined Settings.
+        $this->settings = array_merge($this->settingsDefaults, $this->settings);
     }
 
 
-
     /**
-     * Set Fields
+     * Setup Fields
      * @param  array $args
      *
      */
-    public function setFields($args = array())
+    private function setupFields()
     {
-
         // Check if arguments are empty.
-        if (empty($args) || !is_array($args)) {
-
+        if (empty($this->fields) || !is_array($this->fields)) {
             return;
-
         }
 
         // Setup fields.
-        foreach ($args as $name => $attributes) {
+        foreach ($this->fields as $name => $attributes) {
+            // Remove array item, only to re-build it below.
+            unset($this->fields[$name]);
 
             // If Instructions/Snippet
             if (is_int($name) && is_string($attributes)) {
-
                 $this->fields[]['snippet'] = $attributes;
                 continue;
-
             }
 
+            // Set prefixed name.
+            $name = $this->settings['prefix'] . $name;
+
             // Stored Value.
-            $storedValue = get_post_meta($this->postID, $this->settings['prefix'] . $name, true);
+            $storedValue = get_post_meta($this->postID, $name, true);
 
             if (!empty($storedValue)) {
-
                 $attributes['value'] = $storedValue;
 
                 // Subfield Values.
                 if (!empty($attributes['subfields'])) {
                     $valueArray = json_decode($storedValue);
-                    $valueArray = is_object($valueArray) ? array($valueArray) : $valueArray;
+                    $valueArray = is_object($valueArray) ? [$valueArray] : $valueArray;
                 }
-
             }
         
             // Prefix & Merge Attributes with defaults.
-            $this->fields[$this->settings['prefix'] . $name] = array_merge($this->fieldAttributes, $attributes);
+            $this->fields[$name] = array_merge($this->fieldDefaults, $attributes);
 
             // Subfields.
             if (empty($attributes['subfields'])) {
-
                 continue;
-
             }
 
             foreach ($attributes['subfields'] as $subName => $subAttributes) {
-
                 // If Instructions/Snippet
                 if (is_int($subName) && is_string($subAttributes)) {
-
-                    $this->fields[$this->settings['prefix'] . $name]['subfields'][$subName] = array('snippet' => $subAttributes);
+                    $this->fields[$name]['subfields'][$subName] = ['snippet' => $subAttributes];
                     continue;
-
                 }
 
                 // Prefix & Merge Attributes with defaults.
-                $this->fields[$this->settings['prefix'] . $name]['subfields'][$subName] = array_merge($this->fieldAttributes, $subAttributes);
+                $this->fields[$name]['subfields'][$subName] = array_merge($this->fieldDefaults, $subAttributes);
 
                 // Add Values to subfields.
                 if (empty($valueArray)) {
-
                     continue;
-
                 }
 
                 foreach ($valueArray as $valueName => $value) {
-
-                    $this->fields[$this->settings['prefix'] . $name]['subfields'][$subName]['values'][] = $value->$subName;
-
+                    $this->fields[$name]['subfields'][$subName]['values'][] = $value->$subName;
                 }
-
             }
-
         }
-
     }
-
 
 
     /**
@@ -307,26 +267,32 @@ class Metabox
      */
     private function addCDNAssets()
     {
-
-        add_action('admin_enqueue_scripts', function()
-        {
-
+        add_action(
+            'admin_enqueue_scripts', 
+            function () {
             // Remove Old ACF Versions of Select2
             wp_deregister_script('select2');
             wp_deregister_style('select2');
 
             // Add styles to administrator area.
-            wp_register_style('select2-css', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css', false, '1.0.0');
+            wp_register_style(
+                'select2-css',
+                'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css',
+                false,
+                '4.0.3'
+            );
             wp_enqueue_style('select2-css');
 
             // Add script to administrator area.
-            wp_enqueue_script('select2-js', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js', array('jquery', 'jquery-ui-sortable'), null, false);
-            wp_enqueue_script('select2-js');
-
+            wp_enqueue_script(
+                'select2-js',
+                'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js',
+                ['jquery', 'jquery-ui-sortable'],
+                null,
+                false
+            );
         });
-
     }
-
 
 
     /**
@@ -335,16 +301,13 @@ class Metabox
      */
     private function assetsHeader()
     {
-
-        add_action('admin_head', function()
-        {
-
-            echo file_get_contents(dirname(__FILE__). '/assets/metabox-styles.css');
-
-        });
-
+        add_action(
+            'admin_head', 
+            function () {
+                echo file_get_contents(dirname(__FILE__). '/assets/metabox-styles.css');
+            }
+        );
     }
-
 
 
     /**
@@ -353,18 +316,14 @@ class Metabox
      */
     private function assetsFooter()
     {
-
-        add_action('admin_footer', function()
-        {
-
-            echo file_get_contents(dirname(__FILE__) . '/assets/metabox-scripts.js');
-
-        },
+        add_action(
+            'admin_footer',
+            function () {
+                echo file_get_contents(dirname(__FILE__) . '/assets/metabox-scripts.js');
+            },
             20
         );
-
     }
-
 
 
     /**
@@ -377,15 +336,21 @@ class Metabox
      */
     private function removeWPFeatures()
     {
-
-        foreach ($this->settings['remove'] as $feature) {
-
-            remove_post_type_support(get_post_type($this->postID), $feature);    
-
+        if (empty($this->settings['remove'])) {
+            return;
         }
 
-    }
+        foreach ($this->settings['remove'] as $feature) {
+            remove_post_type_support(get_post_type($this->postID), $feature);
+        }
 
+        // Remove Spacing Issue
+        if (in_array('title', $this->settings['remove']) &&
+            in_array('editor', $this->settings['remove'])
+        ) {
+            echo '<style>#post-body-content { display:none; }</style>';
+        }
+    }
 
 
     /**
@@ -397,35 +362,29 @@ class Metabox
      */
     private function initMetabox()
     {
-
-        add_action('add_meta_boxes', function()
-        {
-
+        add_action('add_meta_boxes', function () {
             // Add Metabox.
             add_meta_box(
                 'custom-metabox-' . $this->settings['id'],
                 $this->settings['title'],
-                array($this, 'showMetaboxHTML'),
-                $this->settings['operator'] == 'AND' ? $this->settings['post_type'] : null,
+                [$this, 'showMetaboxHTML'],
+                null,
                 $this->settings['location'],
                 $this->settings['priority']
             );
 
             // Add dependency class to metabox container to initially hide.
             if (!empty($this->settings['dependency'])) {
-
-                add_filter('postbox_classes_' . get_post_type($this->postID) . '_custom-metabox-' . $this->settings['id'], function($classes) 
-                {
-                    $classes[] = 'data-dependency-key';
-                    return $classes;
-                });
-
+                add_filter(
+                    'postbox_classes_' . get_post_type($this->postID) . '_custom-metabox-' . $this->settings['id'],
+                    function ($classes) {
+                        $classes[] = 'data-dependency-key';
+                        return $classes;
+                    }
+                );
             }
-
         });
-
     }
-
 
 
     /**
@@ -434,38 +393,32 @@ class Metabox
      */
     public function showMetaboxHTML()
     {
-
         // Add nonce for security and authentication.
         wp_nonce_field($this->nonceAction, $this->nonceName);
 
-        // Check for dependency.
+        // Condition Dependency.
         if (!empty($this->settings['dependency'])) {
+            $condition  = ' data-dependency-key="' . $this->settings['dependency']['key'] . '"';
+            $condition .= ' data-dependency-value=\'' . $this->settings['dependency']['value'] . '\'';
+            $condition .= ' data-dependency-condition="' . $this->settings['dependency']['condition'] . '"';
 
-            $dataDependency  = !empty($this->settings['dependency']['key']) ? 'data-dependency-key="' . $this->settings['dependency']['key'] . '"' : '';
-            $dataDependency .= !empty($this->settings['dependency']['value']) ? 'data-dependency-value=\'' . $this->settings['dependency']['value'] . '\'' : '';
-            $dataDependency .= !empty($this->settings['dependency']['condition']) ? 'data-dependency-condition="' . $this->settings['dependency']['condition'] . '"' : '';
-            echo '<span ' . $dataDependency . ' data-key="custom-metabox-' . $this->settings['id'] . '" data-type="metabox"></span>';
-
+            echo '<span data-key="custom-metabox-' . $this->settings['id'] . '" 
+                        data-type="metabox" 
+                        ' . $condition . '></span>';
         }
 
         // Show metabox instructions.
         if (!empty($this->settings['instructions'])) {
-
             echo '<div class="instructions">' . $this->settings['instructions'] . '</div>';
-
         }
 
         // Check if fields are empty.
         if (empty($this->fields)) {
-
             return;
-
         }
 
         $this->getFields();
-
     }
-
 
 
     /**
@@ -475,67 +428,71 @@ class Metabox
      */
     private function getFields()
     {
-
         // Show headers and fields.
         foreach ($this->fields as $name => $attributes) {
-
             // Subfields.
             if (!empty($attributes['subfields'])) {
+                // Condition Dependency.
+                $condition = '';
 
-                // Dependencies.
-                $dataDependency = '';
                 if (!empty($attributes['dependency'])) {
-
-                    $dataDependency  = !empty($attributes['dependency']['key']) ? 'data-dependency-key="' . $attributes['dependency']['key'] . '"' : '';
-                    $dataDependency .= !empty($attributes['dependency']['value']) ? 'data-dependency-value=\'' . $attributes['dependency']['value'] . '\'' : '';
-                    $dataDependency .= !empty($attributes['dependency']['condition']) ? 'data-dependency-condition="' . $attributes['dependency']['condition'] . '"' : '';
-
+                    $condition  = ' data-dependency-key="' . $attributes['dependency']['key'] . '"';
+                    $condition .= ' data-dependency-value=\'' . $attributes['dependency']['value'] . '\'';
+                    $condition .= ' data-dependency-condition="' . $attributes['dependency']['condition'] . '"';
                 }
 
-                // Show field by input type.
-                echo '<div class="input-group type-object" ' . $dataDependency . ' data-key="' . $name . '" data-type="object">';
-
+                // Field markup.
+                echo '<div class="input-group type-object" 
+                           data-key="' . $name . '" 
+                           data-type="object" 
+                           ' . $condition . '>';
+            
                 // Set label if exists.
                 if (!empty($attributes['label'])) {
-
                     echo '<span class="label">' . $attributes['label'] . '</span>';
-
                 }
 
                 // Set description if exists.
                 if (!empty($attributes['description'])) {
-
                     echo '<div class="description">' . $attributes['description'] . '</div>';
-
                 }
 
                 // Subfields.
-                echo '<div data-subfields-container="' . $name . '" ' . ($attributes['repeater'] ? 'data-repeater="true"' : '') . '>';
+                echo '<div data-subfields-container="' . $name . '" 
+                           ' . ($attributes['repeater'] ? 'data-repeater="true"' : '') . '>';
 
-                $count = !empty(reset($attributes['subfields'])['values']) ? count(reset($attributes['subfields'])['values']) : 1;
-                $count = $attributes['repeater'] ? $count : 1;
+                $count = 1;
+
+                if ($attributes['repeater'] && !empty(reset($attributes['subfields'])['values'])) {
+                    $count = count(reset($attributes['subfields'])['values']);
+                }
 
                 for ($i = 0; $i < $count; $i++) {
-
                     echo '<div data-subfields-parent="' . $name . '">';
 
-                        foreach ($attributes['subfields'] as $subName => $subAttributes) {
+                    foreach ($attributes['subfields'] as $subName => $subAttributes) {
+                        // Update Subname.
+                        if ($attributes['repeater']) {
+                            $subName = $name . '[' . $i . '][' . $subName . ']';
+                        } else {
+                            $subName = $name . '[' . $subName . ']';
+                        }
+                        
+                        // Update Value.
+                        $subAttributes['value'] = '';
 
-                            $subName = $attributes['repeater'] ? $name . '[' . $i . '][' . $subName . ']' : $name . '[' . $subName . ']';
-                            $subAttributes['value'] = !empty($subAttributes['values'][$i]) ? $subAttributes['values'][$i] : '';
-
-                            $this->getFieldHTML($subName, $subAttributes);
-
+                        if (!empty($subAttributes['values'][$i])) {
+                            $subAttributes['value'] = $subAttributes['values'][$i];
                         }
 
-                        if ($count > 1) {
+                        $this->getFieldHTML($subName, $subAttributes);
+                    }
 
-                            echo '<button class="button-remove">x</button>';  
-
-                        }
+                    if ($count > 1) {
+                        echo '<button class="button-remove">&#10005;</button>';
+                    }
 
                     echo '</div>';
-
                 }
 
                 // End of Input Area.
@@ -543,9 +500,9 @@ class Metabox
 
                 // If repeater.
                 if ($attributes['repeater']) {
-
-                    echo '<div class="button-controls"><button data-subfields-add="' . $name . '" class="button-primary">Add</button></div>';
-
+                    echo '<div class="button-controls">
+                            <button data-subfields-add="' . $name . '" class="button-primary">Add</button>
+                          </div>';
                 }
 
                 // End of Field Group.
@@ -553,16 +510,12 @@ class Metabox
 
                 // Jump to next field.
                 continue;
-
             }
 
             // Show Fields.
             $this->getFieldHTML($name, $attributes);
-
         }
-
     }
-
 
 
     /**
@@ -572,56 +525,55 @@ class Metabox
      */
     private function getFieldHTML($name, $attributes)
     {
-
-        // Extract array elements into variables.
+        // Extract field attributes.
         extract($attributes);
 
         // HTML/Message Snippet.
         if (!empty($snippet)) {
-
             echo '<div class="snippet">' . $snippet . '</div>';
             return;
-
         }
 
-        // Field type exists.
+        // Field exists.
         if (empty($type) || !file_exists(dirname(__FILE__) . '/fields/' . $type . '.php')) {
-
             echo '<div class="notification-error"><strong>Type</strong> is empty or field does not exist.</div>';
             return;
-
         }
 
-        // Select
+        // Multiselect, append [] to name.
         if ($type == 'select-multiple') {
-
             $name .= '[]';
-
         }
 
-        // Set label if exists.
-        $labelHTML = !empty($label) ? '<label for="' . $name . '">' . $label . ($required ? '<span class="required">*</span>' : '') . '</label>' : '';
+        // Label html.
+        $labelHTML = '';
+        if (!empty($label)) {
+            $requiredHTML = $required ? '<span class="required">*</span>' : '';
+            $labelHTML    = '<label for="' . $name . '">' . $label . $requiredHTML . '</label>';
+        }
 
-        // Set description if exists.
+        // Description html.
         $descriptionHTML = !empty($description) ? '<div class="description">' . $description . '</div>' : '';
 
-        // Dependencies.
-        $dataDependency = '';
+        // Conditional dependency.
+        $condition = '';
+
         if (!empty($dependency)) {
-
-            $dataDependency  = !empty($dependency['key']) ? 'data-dependency-key="' . $dependency['key'] . '"' : '';
-            $dataDependency .= !empty($dependency['value']) ? 'data-dependency-value=\'' . $dependency['value'] . '\'' : '';
-            $dataDependency .= !empty($dependency['condition']) ? 'data-dependency-condition="' . $dependency['condition'] . '"' : '';
-
+            $condition  = ' data-dependency-key="' . $dependency['key'] . '"';
+            $condition .= ' data-dependency-value=\'' . $dependency['value'] . '\'';
+            $condition .= ' data-dependency-condition="' . $dependency['condition'] . '"';
         }
 
-        // Show field by input type.
-        echo '<div class="input-group type-' . $type . '" ' . $dataDependency . ' data-key="' . $name . '" data-type="' . $type . '">';
-            include dirname(__FILE__) . '/fields/' . $type . '.php';
+        // Field group.
+        echo '<div class="input-group type-' . $type . '" 
+                   data-key="' . $name . '" 
+                   data-type="' . $type . '"
+                   ' . $condition . '>';
+
+        include dirname(__FILE__) . '/fields/' . $type . '.php';
+
         echo '</div>';
-
     }
-
 
 
     /**
@@ -630,145 +582,100 @@ class Metabox
      */
     private function initSavePost()
     {
-
-        add_action('save_post', function()
-        {
-
+        add_action('save_post', function () {
             // Validation Check.
             if (!$this->validateSaveRequest()) {
-
                 return;
-
             }
 
             // Loop through Meta Fields.
             foreach ($this->fields as $name => $attributes) {
-
                 // Check if key exists.
                 if (!array_key_exists($name, $_POST)) {
-
                     continue;
-
                 }
 
                 // Callback.
                 if (!$this->callback($name, $attributes)) {
-
                     continue;
-
                 }
 
                 // Subfields.
                 if (!empty($attributes['subfields'])) {
-
                     $hasValue = false;
 
                     // If repeater check deeper array.
                     if ($attributes['repeater']) {
-
                         foreach ($_POST[$name] as &$inputGroups) {
-
                             foreach ($inputGroups as $inputName => &$inputValue) {
-
                                 if (empty($inputValue)) {
-
                                     continue;
-
                                 }
 
-                                if (!empty($attributes['subfields'][$inputName]) && $attributes['subfields'][$inputName]['type'] == 'select2-multiple') {
-
+                                if (!empty($attributes['subfields'][$inputName]) &&
+                                    $attributes['subfields'][$inputName]['type'] == 'select2-multiple'
+                                ) {
                                     $inputValue = explode(',', $inputValue);
-
                                 }
 
                                 $hasValue = true;
-
                             }
-
                         }
-
                     } else {
-
                         foreach ($_POST[$name] as $inputName => &$inputValue) {
-
                             if (empty($inputValue)) {
-
                                 continue;
-
                             }
 
-                            if (!empty($attributes['subfields'][$inputName]) && $attributes['subfields'][$inputName]['type'] == 'select2-multiple') {
-
+                            if (!empty($attributes['subfields'][$inputName]) &&
+                                $attributes['subfields'][$inputName]['type'] == 'select2-multiple'
+                            ) {
                                 $inputValue = explode(',', $inputValue);
-
                             }
 
                             $hasValue = true;
-
                         }
-
                     }
 
                     // Check if multidimensional array is empty.
                     if (!$hasValue) {
-
                         $_POST[$name] = '';
-
                     }
-
                 }
 
                 // Delete Post Meta Fields if Empty.
                 if (empty($_POST[$name]) && $attributes['type'] != 'radio') {
-
                     delete_post_meta(
                         $this->postID,
                         $name
                     );
                     continue;
-
                 }
 
                 // select2-multiple: Convert Value to Array.
                 if (!empty($attributes['type']) && $attributes['type'] == 'select2-multiple') {
-
                     $_POST[$name] = explode(',', $_POST[$name]);
-
                 }
 
                 // If is value is array
                 if (is_array($_POST[$name])) {
-
-                    $_POST[$name] = wp_slash(
-                        stripslashes(
-                            json_encode(
-                                $_POST[$name], JSON_PRETTY_PRINT|JSON_HEX_QUOT|JSON_HEX_APOS
-                            )
-                        )
-                    );
+                    $_POST[$name] = array_map('stripslashes_deep', $_POST[$name]);
+                    $_POST[$name] = wp_slash(json_encode($_POST[$name], JSON_PRETTY_PRINT|JSON_HEX_QUOT|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS));
 
                     if (JSON_ERROR_NONE != json_last_error()) {
-
                         throw new \Exception('JSON encoding failed with error:' . json_last_error_msg());
-
                     }
-
                 }
-
+                
                 // Update Post Meta Fields.
                 update_post_meta(
                     $this->postID,
                     $name,
                     $_POST[$name]
                 );
-
             }
-
         });
-
     }
-
 
 
     /**
@@ -779,60 +686,43 @@ class Metabox
      */
     private function validateSaveRequest()
     {
-
         // Check if $_POST request.
         if (empty($_POST)) {
-
             return false;
-
         }
 
         // Add nonce for security and authentication
         if (!isset($_POST[$this->nonceName])) {
-
             return false;
-
         }
 
         // Check if nonce is set & nonce is valid.
         if (!wp_verify_nonce($_POST[$this->nonceName], $this->nonceAction)) {
-
             return false;
-
         }
 
         // Check if user has permissions to save data.
         if (!current_user_can('edit_post', $this->postID)) {
-
             return false;
-
         }
 
         // Check if not an autosave.
         if (wp_is_post_autosave($this->postID)) {
-
             return false;
-
         }
 
         // Check if not a revision.
         if (wp_is_post_revision($this->postID)) {
-
             return false;
-
         }
 
         // Check if fields are empty.
         if (empty($this->fields)) {
-
             return false;
-
         }
 
         return true;
-
     }
-
 
 
     /**
@@ -845,176 +735,66 @@ class Metabox
      */
     private function validateSettings()
     {
-        // vars.
-        $hasPost = $hasPostType = $hasParent = $hasTaxonomy = $hasTemplates = ($this->settings['operator'] == 'AND');
-
-        // Check if admin.
-        if (!is_admin()) {
-
-            return false;
-
-        }
-
         // Check if post is empty.
         if (empty($this->postID)) {
-
-            return false;
-
+            return true;
         }
 
-        // Check if settings.posts is set.
-        if (!empty($this->settings['post'])) {
-
-            $hasPost = false;
-
-            if (
-                (is_array($this->settings['post']) && in_array($this->postID, $this->settings['post'])) ||
-                ($this->settings['post'] == $this->postID)
-            ) {
-
-                $hasPost = true;
-
-            }
-
+        // Check if Post(s).
+        if (!empty($this->settings['post']) &&
+            in_array($this->postID, $this->settings['post'])
+        ) {
+            return true;
         }
 
-        // Check if settings.parent is set.
-        if (!empty($this->settings['post_type'])) {
-
-            $hasPostType = false;
-
-            if (
-                (is_array($this->settings['post_type']) && in_array(get_post_type($this->postID), $this->settings['post_type'])) ||
-                $this->settings['post_type'] == get_post_type($this->postID)
-            ) {
-                
-                $hasPostType = true;
-
-            }
-
+        // Check if Post Type.
+        if (!empty($this->settings['post_type']) &&
+            in_array(get_post_type($this->postID), $this->settings['post_type'])
+        ) {
+            return true;
         }
 
-        // Check if settings.parent is set.
-        if (!empty($this->settings['parent'])) {
-
-            $hasParent = false;
-
-            if (
-                (is_array($this->settings['parent']) && in_array(wp_get_post_parent_id($this->postID), $this->settings['parent'])) ||
-                $this->settings['parent'] == wp_get_post_parent_id($this->postID)
-            ) {
-
-                $hasParent = true;
-
-            }
-
+        // Check if Parent.
+        if (!empty($this->settings['parent']) &&
+            in_array(wp_get_post_parent_id($this->postID), $this->settings['parent'])
+        ) {
+            return true;
         }
 
         // Check if settings.taxonomy is set.
-        if (!empty($this->settings['taxonomy']) && is_array($this->settings['taxonomy'])) {
-
-            $hasTaxonomy = false;
-
+        if (!empty($this->settings['taxonomy'])) {
             // Loop taxonomies & match terms for post.
             foreach ($this->settings['taxonomy'] as $taxonomyAllowed => $termsAllowed) {
-
                 // Get post terms based on taxonomy.
                 $postTerms = get_the_terms($this->postID, $taxonomyAllowed);
 
                 // Check for if post terms.
                 if (is_wp_error($postTerms) || empty($postTerms)) {
-
                     continue;
-
                 }
 
                 // Loop through post terms in taxonomy.
                 foreach ($postTerms as $postTerm) {
-
                     // Check terms compared to user inputted array of values.
-                    if (
-                        (
-                            is_array($termsAllowed) &&
-                            (
-                                in_array($postTerm->slug, $termsAllowed) ||
-                                in_array($postTerm->term_id, $termsAllowed) ||
-                                in_array($postTerm->name, $termsAllowed)
-                            )
-                        ) ||
-                        (
-                            $postTerm->slug == $termsAllowed ||
-                            $postTerm->term_id == $termsAllowed ||
-                            $postTerm->name == $termsAllowed
-                        )
+                    if (in_array($postTerm->slug, $termsAllowed) ||
+                        in_array($postTerm->term_id, $termsAllowed) ||
+                        in_array($postTerm->name, $termsAllowed)
                     ) {
-
-                        $hasTaxonomy = true;
-                        break;
-
+                        return true;
                     }
-
                 }
-
-                // Stop Loop once found true
-                if ($hasTaxonomy) {
-
-                    break;
-
-                }
-
             }
-
         }
 
-        // Check if settings.template is set.
-        if (!empty($this->settings['template'])) {
-
-            // vars.
-            $hasTemplates = false;
-            $template     = get_page_template_slug($this->postID);
-
-            if (
-                !empty($template) &&
-                (
-                    (is_array($this->settings['template']) && in_array($template, $this->settings['template'])) ||
-                    ($this->settings['template'] == $template)
-                )
-            ) {
-
-                $hasTemplates = true;
-
-            }
-
+        // Check if Template.
+        if (!empty($this->settings['template']) &&
+            in_array(get_page_template_slug($this->postID), $this->settings['template'])
+        ) {
+            return true;
         }
 
-        // Final Check
-        if ($this->settings['operator'] == 'AND') {
-
-            if (!$hasPost || !$hasPostType || !$hasParent || !$hasTaxonomy || !$hasTemplates) {
-
-                return false;
-
-            } else {
-
-                return true;
-
-            }
-
-        } else {
-
-            if ($hasPost || $hasPostType || $hasParent || $hasTaxonomy || $hasTemplates) {
-
-                return true;
-
-            } else {
-
-                return false;
-            }
-
-        }
-
+        return false;
     }
-
 
 
     /**
@@ -1023,39 +803,23 @@ class Metabox
      */
     private function callback($name, $attributes)
     {
-
-        // Check if callback exists.
-        if (empty($attributes['callback'])) {
-
+        // Check if callback exists\Check if is callable.
+        if (empty($attributes['callback']) || !is_callable($attributes['callback'])) {
             return true;
-
-        }
-
-        // Call self instead of class.
-        $attributes['callback'] = str_replace(array('Metabox::', 'Metabox->'), 'self::', $attributes['callback']);
-
-        // Check if is callable.
-        if (!is_callable($attributes['callback'])) {
-
-            return true;
-
         }
 
         // Data attribute of callback.
-        $data = array(
+        $data = [
             'postID'     => $this->postID,
-            'metakey'    => $name,
-            'metavalue'  => !empty($_POST[$name]) ? $_POST[$name] : '',
+            'name'       => $name,
+            'value'      => !empty($_POST[$name]) ? $_POST[$name] : '',
             'attributes' => $attributes
-        );
+        ];
 
         // Callback Function, pass in value as data argument.
         return (call_user_func($attributes['callback'], $data) === false) ? false : true;
-
     }
-
 }
-
 
 
 /**
@@ -1063,7 +827,5 @@ class Metabox
  *
  */
 foreach (glob(__DIR__ . '/plugins/*.php') as $filename) {
-
     require_once $filename;
-
 }
