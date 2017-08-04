@@ -1,5 +1,3 @@
-<script>
-
 /**
  * Subfield Repeater Dependencies.
  */
@@ -119,13 +117,13 @@
         var find       = parent + '\\[\\d\\]';
 
         // Loop All Repeater Addition Groups.
-        $.each($additions, function(additionIndex, value) {
+        $.each($additions, function(additionIndex) {
 
           var $inputGroups = $(this).find('.input-group');
           var replace      = parent + '[' + additionIndex + ']';
 
           // Loop Inputs in Addition Group.
-          $.each($inputGroups, function(inputIndex, value) {
+          $.each($inputGroups, function() {
 
             // vars.
             var $this = $(this);
@@ -245,7 +243,7 @@
       // Sortable on Subfields container. V2
       $('[data-repeater]').sortable( {
 
-        update: function(event, ui) {
+        update: function() {
 
           updateNames($(this).data('subfields-container'));
 
@@ -467,5 +465,3 @@
     }
 
 })(jQuery);
-
-</script>

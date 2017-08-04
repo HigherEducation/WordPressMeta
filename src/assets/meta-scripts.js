@@ -1,24 +1,9 @@
-<script>
-
-/**
- * Confirm before updating/removing
- */
 function confirmResults(message) {
+    var check = confirm(message);
 
-  var check = confirm(message);
-
-  if (check == true) {
-
-    return true;
-
-  }
-
-  else {
-
-    return false;
-
-  }
-
+    if (check == true) {
+        return true;
+    } else {
+        return false;
+    }
 }
-
-</script>
