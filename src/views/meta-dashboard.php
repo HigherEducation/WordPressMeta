@@ -234,9 +234,9 @@
                 }
 
                 ?>
-                </td>
-                <td><?php echo $metaHTML; ?></td>
-            <tr>
+            </td>
+            <td><?php echo $metaHTML; ?></td>
+        </tr>
 
         <?php endforeach;
     endif; ?>
