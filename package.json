@@ -22,7 +22,7 @@
     }
   },
   "scripts": {
-    "lint:php": "phpcs --standard=PSR2 --extensions=php review/.",
+    "lint:php": "phpcs --standard=PSR2 --extensions=php .",
     "lint:js": "eslint .",
     "lint:sass": "sass-lint -vq --max-warnings=0",
     "test": "run-s -c lint:* -s"
