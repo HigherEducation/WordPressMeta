@@ -107,6 +107,13 @@ $metabox->build();
 
 ##### dependency 
 (array) (Optional) Metabox dependency based on metafield conditions. Conditionals include `>, <, >=, <=, ==, !=, between, outside`. For `>, <, >=, <=`, only accept numeric values. For `==, !=`, can accept single value or array of values to match. e.g. `value` or `[3, "343", 55, "Value"]`. For `between & outside` only accepts array of values. e.g. `[2, 6]`. 
+```
+'dependency' => [
+    'key'       => 'metakey',
+    'value'     => 'value', // Format: 'value' || '[value, value, ...]'
+    'condition' => '>, <, >=, <=, ==, !=, between, outside',
+]
+```
 
 ##### remove
 (string|array) (Optional) Remove support for a feature from a post type. `custom-fields` is set as default.
@@ -121,14 +128,6 @@ $metabox->build();
 - 'revisions' (will store revisions)
 - 'page-attributes' (template and menu order) (hierarchical must be true)
 - 'post-formats' removes post formats, 
-
-```
-'dependency' => [
-    'key'       => 'metakey',
-    'value'     => 'value', // Format: 'value' || '[value, value, ...]'
-    'condition' => '>, <, >=, <=, ==, !=, between, outside',
-]
-```
 
 
 ## Fields
@@ -372,14 +371,14 @@ For validation, use `pattern` attribute with `tel` input if browser doesn't supp
 Can be inserted between metakeys to create titles, breaks, messages or additional instructions. 
 
 
-##### Nested
+##### Object
 ```
 'metakey' => [
     'label'       => '',
     'description' => '',
     'dependency'  => [],
     'callback'    => '',
-    'repeater'    => bool
+    'repeater'    => true|false
     'subfields'   => [
         'subkey' => [
             'type'   => 'text', 
@@ -396,7 +395,7 @@ Can be inserted between metakeys to create titles, breaks, messages or additiona
     ],
 ],
 ```
-Builds a nested json object into the `metakey`, this can be a repeater with an array of objects stored if `repeater` set to true. Note: Editor field currently doesn't work with repeater field. Also subkeys do not except `dependency` or `callback` attributes.
+Builds a json object into the `metakey`, this can be a repeater with an array of objects stored if `repeater` set to true. Note: Editor field currently doesn't work with repeater field. Also subkeys do not except `dependency` or `callback` attributes.
 
 ### Field Properties Information
 
@@ -443,10 +442,10 @@ Builds a nested json object into the `metakey`, this can be a repeater with an a
 (string) (Optional) Give the field a little more style love. Work with all fields except, select2s, checkbox, and radio field types. 
 
 ##### subfields 
-(array) (Optional) Nested children fields. This gets saved as an array. NOTE: `Dependency & Callbacks` attributes don't work with subfield attributes.
+(array) (Optional) Object children fields. This gets saved as an array. NOTE: `Dependency & Callbacks` attributes don't work with subfield attributes.
 
 ##### repeater 
-(bool) (Optional) Whether or not nested children subfields are repeated. NOTE: `Editor` fields currently do not work in repeaters.
+(bool) (Optional) Whether or not object children subfields are repeated. This creates an array of objects. NOTE: `Editor` fields currently do not work in repeaters.
 
 ```
 'dependency' => [
