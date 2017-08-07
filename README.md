@@ -544,7 +544,7 @@ Pulls in posts with attached `metakey`, no matter the value. Basically equals th
 #### Key with Value: `'metakey' => 'value'` 
 Pulls in posts where `metakey` equals `value`. You may also look for metakeys that exists but have no value. `'metakey' => ''`
 
-#### Key with Array Value: `'metakey' => ['searchValue', 'replaceableValue')` 
+#### Key with Array Value: `'metakey' => ['searchValue', 'replaceableValue']` 
 Pulls in posts like above using the `searchValue`. This allows you to replace `metakey` values from the dashboard.
 
 
