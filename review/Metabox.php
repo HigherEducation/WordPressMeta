@@ -106,18 +106,18 @@ class Metabox
         add_action(
             'init',
             function () {
-            // Set Post ID.
+                // Set Post ID.
                 $this->setPostID();
 
-            // Setup Settings.
+                // Setup Settings.
                 $this->setupSettings();
 
-            // Initiate if in adminstrator area.
+                // Initiate if in adminstrator area.
                 if (!$this->validateSettings()) {
                     return;
                 }
 
-            // Check to see if assets already loaded, only load assets once.
+                // Check to see if assets already loaded, only load assets once.
                 if (!self::$assetsLoaded) {
                     self::$assetsLoaded = true;
 
@@ -127,7 +127,7 @@ class Metabox
                     $this->removeWPFeatures();
                 }
 
-            // Setup Fields, Create Metabox, Save Metabox.
+                // Setup Fields, Create Metabox, Save Metabox.
                 $this->setupFields();
                 $this->initMetabox();
                 $this->initSavePost();
@@ -170,14 +170,14 @@ class Metabox
 
         // If Properties delcared as strings, convert to arrays.
         foreach ($this->settings as $name => &$setting) {
-            if (!empty($this->settings[$name]) &&
-                !is_array($this->settings[$name]) &&
+            if (!empty($setting) &&
+                !is_array($setting) &&
                 is_array($this->settingsDefaults[$name])
             ) {
-                $setting = [$this->settings[$name]];
+                $setting = [$setting];
             }
 
-            if ($name == 'taxonomy') {
+            if ($name == 'taxonomy' && !empty($setting)) {
                 foreach ($setting as $taxonomy => &$term) {
                     if (!empty($term) && !is_array($term)) {
                         $term = [$term];
@@ -270,11 +270,11 @@ class Metabox
         add_action(
             'admin_enqueue_scripts',
             function () {
-            // Remove Old ACF Versions of Select2
+                // Remove Old ACF Versions of Select2
                 wp_deregister_script('select2');
                 wp_deregister_style('select2');
 
-            // Add styles to administrator area.
+                // Add styles to administrator area.
                 wp_register_style(
                     'select2-css',
                     'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css',
@@ -283,7 +283,7 @@ class Metabox
                 );
                 wp_enqueue_style('select2-css');
 
-            // Add script to administrator area.
+                // Add script to administrator area.
                 wp_enqueue_script(
                     'select2-js',
                     'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js',

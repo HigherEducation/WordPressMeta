@@ -4,31 +4,26 @@
             <th>
                 <h3>Meta Class</h3>
                 <h4>$meta = new Meta();</h4>
-                <p>Add `?meta=1` to url, to setup UI.</p>
-                <h4>$meta->setMeta();</h4>
-                <p>$meta->setMeta(array(
+                <p>$meta->meta = [
                 <br />&nbsp;&nbsp;&nbsp;&nbsp;'meta_key' => 'meta_value',
-                <br />&nbsp;&nbsp;&nbsp;&nbsp;'meta_key' => array('meta_value', 'new_value'),
+                <br />&nbsp;&nbsp;&nbsp;&nbsp;'meta_key' => ['meta_value', 'new_value'],
                 <br />&nbsp;&nbsp;&nbsp;&nbsp;'meta_key',
-                <br />));</p>
-                <h4>$meta->setQuery();</h4>
-                <p>$meta->setQuery(array(
-                <br />&nbsp;&nbsp;&nbsp;&nbsp;'posts' => array('343', 234, 12),
-                <br />&nbsp;&nbsp;&nbsp;&nbsp;'post_type' => array('post', 'cpt_post'),
-                <br />&nbsp;&nbsp;&nbsp;&nbsp;'parents' => array(45, 234, '23'),
-                <br />&nbsp;&nbsp;&nbsp;&nbsp;'taxonomy' => array( taxonomy => array('term_1', 'term_2')),
-                <br />&nbsp;&nbsp;&nbsp;&nbsp;'templates' => array('front-page.php'),
-                <br />&nbsp;&nbsp;&nbsp;&nbsp;'slug' => 'page-slug-name',
-                <br />&nbsp;&nbsp;&nbsp;&nbsp;'wp_args' => refer to $args for WP_Query.
-                <br />));</p>
-                <h4>$meta->init();</h4>
-                <p>Shows the results with defined fields &amp; query set.</p>
+                <br />];</p>
+                <p>$meta->query = [
+                <br />&nbsp;&nbsp;&nbsp;&nbsp;'posts'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; => ['343', 234, 12],
+                <br />&nbsp;&nbsp;&nbsp;&nbsp;'post_type' => ['post', 'cpt_post'],
+                <br />&nbsp;&nbsp;&nbsp;&nbsp;'parents'&nbsp;&nbsp;&nbsp;&nbsp; => [45, 234, '23'],
+                <br />&nbsp;&nbsp;&nbsp;&nbsp;'taxonomy' => ['taxonomy' => ['term_1', 'term_2']],
+                <br />&nbsp;&nbsp;&nbsp;&nbsp;'templates' => ['front-page.php'],
+                <br />&nbsp;&nbsp;&nbsp;&nbsp;'slug'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; => 'page-slug-name',
+                <br />&nbsp;&nbsp;&nbsp;&nbsp;'wp_args'&nbsp;&nbsp;&nbsp;&nbsp; => [], refer to $args for WP_Query.
+                <br />];</p>
+                <h4>$meta->build();</h4>
             </th>
-            <th>
 
+            <th>
                 <h5>Meta</h5>
                 <?php
-
                 $hasUpdates  = false;
                     
                 // Meta loop.
@@ -45,13 +40,11 @@
                 } else {
                     echo '<pre>Meta data not set.</pre>';
                 }
-
                 ?>
                 <hr />
 
                 <h5>Query</h5>
                 <?php
-
                 $hasSettings = false;
 
                 // Loop Queries.
@@ -72,13 +65,11 @@
                 if (!$hasSettings) {
                     echo '<pre>Query arguments not set, all post(s) queried.</pre>';
                 }
-
                 ?>
                 <hr />
 
                 <h5>Results</h5>
                 <?php
-
                 // Count, Results || Posts, if not 0 posts.
                 if (!empty($this->results)) {
                     echo '<pre>' . count($this->results) . ' Post(s) Effected</pre>';
@@ -108,7 +99,6 @@
                 if (!empty($_GET['id'])) {
                     echo '<a class="btn-back" href="' . home_url() . '?meta=1">Back</a>';
                 }
-
                 ?>
             </th>
         </tr>
@@ -116,12 +106,11 @@
 
     <tfoot>
         <tr>
-            <td colspan="2">Remove `init` method or `?meta=1` from url to exit this screen.</td>
+            <td colspan="2">Remove `build` method or `?meta=1` from url to exit this screen.</td>
         </tr>
     </tfoot>
 
     <?php
-
     // Results.
     if (!empty($this->results)) :
         foreach ($this->results as $post_id => $meta) :
@@ -133,9 +122,9 @@
                 <a href="<?php echo get_permalink($post_id); ?>">View Post</a> - 
                 <a href="<?php echo admin_url('post.php?post=' . $post_id . '&action=edit'); ?>">Edit Post</a>
             </td>
+
             <td>
             <?php
-
             if (!empty($meta)) {
                 foreach ($meta as $key => $value) {
                     echo '<pre class="' . $_GET['action'] . '"><strong>' . $key . '</strong> = ';
@@ -149,16 +138,16 @@
                     echo '</pre>';
                 }
             }
-
             ?>
             </td>
-            <tr>
+        </tr>
     <?php
         endforeach;
     elseif (!empty($this->posts) && empty($_GET['action'])) :
         foreach ($this->posts as $post_id => $title) :
             $metaHTML  = '';
             $hasUpdate = false;
+            $title     = strip_tags($title);
 
             // Meta values.
             if (!empty($this->meta)) {
@@ -175,23 +164,16 @@
                         $metaHTML .= '<strong>' . $key . '</strong> = ' . $storedValue;
 
                         // Remove link.
-                        $messageRemove = '\'Remove ' . strtoupper($key) . ' from ' . $title . '?\'';
                         $metaHTML .= ' <a class="link-remove" 
-                                          href="' . home_url() . '?meta=1&id=' . $post_id . '&metakey=' . $key . '&metavalue=' . $storedValue . '&action=remove" 
-                                          onclick="return confirmResults(' . $messageRemove . ')">Remove</a>';
+                                          href="' . home_url() . '?meta=1&id=' . $post_id . '&metakey=' . $key . '&action=remove" 
+                                          onclick="return confirmResults(\'Remove ' . strtoupper($key) . ' from ' . $title . '?\')">Remove</a>';
 
                         // Update link.
                         if (is_array($value)) {
                             $hasUpdate = true;
-                            $messageUpdate = '\'Update ' . strtoupper($key) . ' from ' . $title . '?\'';
                             $metaHTML .= ' <a class="link-update" 
-                                              href="' . home_url() . '?meta=1
-                                              &id=' . $post_id . '
-                                              &metakey=' . $key . '
-                                              &metavalue=' . $storedValue . '
-                                              &value=' . $value[1] . '
-                                              &action=update" 
-                                              onclick="return confirmResults(' . $messageUpdate . ')">Update</a>';
+                                              href="' . home_url() . '?meta=1&id=' . $post_id . '&metakey=' . $key . '&value=' . $value[1] . '&action=update" 
+                                              onclick="return confirmResults(\'Update ' . strtoupper($key) . ' from ' . $title . '?\')">Update</a>';
                         }
 
                         $metaHTML .= '</pre>';
@@ -202,37 +184,31 @@
                 $meta = get_post_meta($post_id);
 
                 foreach ($meta as $key => $value) {
-                    $messageRemove ='\'Remove ' . strtoupper($key) . ' from ' . $title . '?\'';
                     $metaHTML .= '<pre>';
                     $metaHTML .= '<strong>' . $key . '</strong> = ' . $value[0];
                     $metaHTML .= ' <a class="link-remove" 
-                                          href="' . home_url() . '?meta=1&id=' . $post_id . '&metakey=' . $key . '&metavalue=' . $value[0] . '&action=remove" 
-                                          onclick="return confirmResults(' . $messageRemove . ')">Remove</a>';
+                                          href="' . home_url() . '?meta=1&id=' . $post_id . '&metakey=' . $key . '&action=remove" 
+                                          onclick="return confirmResults(\'Remove ' . strtoupper($key) . ' from ' . $title . '?\')">Remove</a>';
                     $metaHTML .= '</pre>';
                 }
             }
-
         ?> 
 
         <tr>
             <td>
                 <strong><?php echo $title; ?></strong><br />
                 <strong>ID: </strong><?php echo $post_id; ?><br /><br />
-                <a href="<?php echo get_permalink($post_id); ?>">View</a> 
-                - <a href="<?php echo admin_url('post.php?post=' . $post_id . '&action=edit'); ?>">Edit</a>
+                <a href="<?php echo get_permalink($post_id); ?>">View</a> - 
+                <a href="<?php echo admin_url('post.php?post=' . $post_id . '&action=edit'); ?>">Edit</a>
                 <?php
-
                 if (!empty($this->meta)) {
                     if ($hasUpdate) {
-                        $messageUpdate = '\'Update Meta from ' . $title . '?\'';
                         echo ' - <a href="' . home_url() . '?meta=1&id=' . $post_id . '&action=update" 
-                                    onclick="return confirmResults(' . $messageUpdate  . ')">Update</a>';
+                                    onclick="return confirmResults(\'Update Meta from ' . $title . '?\')">Update</a>';
                     }
-                    $messageRemove = '\'Remove Meta from ' . $title . '?\'';
                     echo ' - <a href="' . home_url() . '?meta=1&id=' . $post_id . '&action=remove" 
-                                onclick="return confirmResults(' . $messageRemove . ')">Remove</a>';
+                                onclick="return confirmResults(\'Remove Meta from ' . $title . '?\')">Remove</a>';
                 }
-
                 ?>
             </td>
             <td><?php echo $metaHTML; ?></td>
