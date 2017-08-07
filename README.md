@@ -519,13 +519,13 @@ Used to retrieve meta fields with defined search query/fields. **Requirements to
 use WordPressMeta\Meta;
 
 $meta = new Meta;
-$meta->setMeta([
-    ... Meta
-));
-$meta->setQuery([
-    ... Query
-));
-$meta->init();
+$meta->meta = [
+    ...Meta
+];
+$meta->query = [
+    ...Query
+];
+$meta->build();
 ```
 ## Meta
 ```
@@ -554,7 +554,7 @@ Pulls in posts like above using the `searchValue`. This allows you to replace `m
     'post'      => [],
     'post_type' => [],
     'parent'    => [],
-    'taxonomy'  => ['taxonomy' => ['term', 'term')],
+    'taxonomy'  => ['taxonomy' => ['term', 'term']],
     'template'  => [],
     'slug'      => '',
     'wp_args'   => Refer to: https://codex.wordpress.org/Class_Reference/WP_Query,
@@ -585,18 +585,18 @@ Pulls in posts like above using the `searchValue`. This allows you to replace `m
 #### Example Usage
 ```
 $meta = new Meta;
-$meta->setMeta([
+$meta->meta = [
     'degree_level_id' => 2,
-    'editorial_only_page' => [0, 2)
-));
-$meta->setQuery([
+    'editorial_only_page' => [0, 2]
+];
+$meta->query = [
     'post'      => ['5474', '6505', '6504', '6503', '234234322'],
     'post_type' => ['post'],
     'parent'    => ['172'],
     'taxonomy'  => ['category' => ['college-rankings')],
     'template'  => ['page-banner.php'],
     'slug'      => 'page-slug-name',
-    'wp_args'   => [ 'category__in' => [ 5, 6 ) ],
-));
-$meta->init();
+    'wp_args'   => ['category__in' => [5, 6]],
+];
+$meta->build();
 ```
