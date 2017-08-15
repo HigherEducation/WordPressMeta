@@ -604,7 +604,7 @@ class Metabox
                 }
 
                 // Subfields.
-                if (!empty($attributes['subfields'])) {
+                if (!empty($attributes['subfields']) && is_array($_POST[$name])) {
                     $hasValue = false;
 
                     // If repeater check deeper array.
